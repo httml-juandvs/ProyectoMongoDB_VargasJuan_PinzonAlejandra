@@ -292,8 +292,8 @@ Se definieron las siguientes relaciones entre entidades para representar el sist
 ❖ Cardinalidad: 1-N (uno a muchos).  
 
 
-
 ```mermaid
+erDiagram
     HOSPITAL ||--o{ AREA_MEDICA : tiene
     HOSPITAL ||--o{ PERSONAL_MANTENIMIENTO : tiene
 
