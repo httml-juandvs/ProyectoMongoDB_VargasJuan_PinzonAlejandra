@@ -1,17 +1,71 @@
-# Proyecto Sistema Hospitalario
+<h3 align="center";>
 
-**Autores:**  
-Juan David Vargas Soto  
-Alejandra Pinzon Alvarez 
+**PROYECTO SISTEMA HOSPITALARIO**
 
-**Trainer:** 
-Pedro Felipe Gómez Bonilla  
+</h3>
 
-**Grupo:** S1  
-**Institución:** Campuslands  
-**Ruta:** Cajasan - Ruta Node.js  
-**Ubicación:** Bucaramanga, Santander  
-**Año:** 2025  
+<br>
+<br>
+<br>
+
+<h3 align="center";>
+
+**Alejandra Pinzón Alvares**
+
+</h3>
+
+<h3 align="center";>
+
+**Juan David Vargas Soto**
+
+</h3>
+
+<br>
+<br>
+<br>
+<br>
+
+<h3 align="center";>
+
+**S1**
+
+</h3>
+
+<h3 align="center";>
+
+**Pedro Felipe Gómez Bonilla**
+
+</h3>
+
+<br>
+<br>
+<br>
+<br>
+
+<h3 align="center";>
+
+**CAMPUSLANDS**
+
+</h3>
+
+<h3 align="center";>
+
+**RUTA NODE**
+
+</h3>
+
+<h3 align="center";>
+
+**BUCARAMANGA, SANTANDER**
+
+</h3>
+
+<h3 align="center";>
+
+**2025**
+
+</h3>
+
 
 ---
 
@@ -239,7 +293,7 @@ Se definieron las siguientes relaciones entre entidades para representar el sist
 
 
 
-```erDiagram
+```mermaid
     HOSPITAL ||--o{ AREA_MEDICA : tiene
     HOSPITAL ||--o{ PERSONAL_MANTENIMIENTO : tiene
 
