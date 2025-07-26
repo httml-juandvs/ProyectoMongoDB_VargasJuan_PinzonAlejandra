@@ -115,3 +115,220 @@ Una vez analizados los requerimientos establecidos para el desarrollo de un sist
 Se diseñó el modelo conceptual identificando cada una de las entidades, sus atributos y las relaciones entre ellas. Este modelo conceptual proporciona una visión clara y estructurada de cómo se organizarán y conectarán los diferentes elementos de la base de datos.
 
 Para entender el diseño del modelo conceptual, se debe tener en cuenta los elementos básicos de un modelo original.
+
+**Descripción de Entidades y Atributos**
+
+*1. Hospital*
+- `id_hospital`: ID único del hospital.
+- `nombre`: Nombre del hospital.
+
+*2. Área Médica*
+- `id_area`: ID único del área.
+- `id_hospital`: Hospital al que pertenece.
+- `nombre`: Nombre del área médica (cardiología, neurología, etc.).
+
+*3. Personal Médico*
+- `id`: ID único del personal médico.
+- `numero_colegiatura`: Número de colegiatura médica.
+- `nombre`: Nombre completo.
+- `especialidad`: Especialidad médica.
+- `teléfono`: Número de celular.
+- `correo`: Dirección de correo electrónico.
+- `salario`: Salario.
+
+*4. Personal de Enfermería*
+- `id`: ID único.
+- `id_personal`: ID del personal.
+- `nombre`: Nombre completo.
+- `teléfono`: Número de celular.
+- `correo`: Dirección de correo electrónico.
+- `salario`: Salario.
+
+*5. Personal Administrativo*
+- `id`: ID único.
+- `id_personal`: ID del personal.
+- `area`: Área administrativa en la que labora.
+- `nombre`: Nombre completo.
+- `teléfono`: Número de celular.
+- `correo`: Dirección de correo electrónico.
+- `salario`: Salario.
+
+*6. Personal de Mantenimiento*
+- `id`: ID único.
+- `id_personal`: ID del personal.
+- `tipo_servicio`: Tipo de servicio prestado (limpieza, eléctrico, etc.).
+- `nombre`: Nombre completo.
+- `teléfono`: Número de celular.
+- `correo`: Dirección de correo electrónico.
+- `salario`: Salario.
+
+*7. Paciente*
+- `cedula`: Cédula del paciente.
+- `nombre`: Nombre completo.
+- `direccion`: Dirección.
+- `teléfono`: Número de celular.
+- `correo`: Dirección de correo electrónico.
+
+*8. Tratamiento Médico*
+- `id`: ID único de ltratamiento.
+- `id_paciente`: ID del paciente.
+- `id_medico`: ID del médico tratante.
+- `diagnostico`: Descripción del diagnóstico.
+- `procedimiento`: Procedimientos realizados.
+- `fecha_inicio`: Fecha de inicio.
+- `fecha_fin`: Fecha de finalización (opcional).
+
+*9. Medicamento*
+- `id`: ID único del medicamento recetado.
+- `id_tratamiento`: ID del tratamiento.
+- `nombre`: Nombre del medicamento.
+- `dosis`: Dosis indicada.
+- `frecuencia`: Frecuencia de administración.
+
+*10. Visita Médica*
+- `id`: ID único de la visita.
+- `id_paciente`: ID del paciente.
+- `id_medico`: ID del médico.
+- `fecha`: Fecha de la consulta.
+- `motivo`: Motivo de la visita.
+- `observaciones`: Observaciones médicas.
+
+### Relaciones y Cardinalidades del Modelo Conceptual
+
+Se definieron las siguientes relaciones entre entidades para representar el sistema hospitalario:
+
+1. Hospital – Área Médica  
+❖ Relación: "Tiene", un hospital puede tener muchas áreas médicas.  
+❖ Cardinalidad: 1-N (uno a muchos).  
+
+2. Hospital – Personal de Mantenimiento  
+❖ Relación: "Cuenta", un hospital puede tener muchos trabajadores de mantenimiento.  
+❖ Cardinalidad: 1-N (uno a muchos).  
+
+3. Área Médica – Personal Médico  
+❖ Relación: "Asigna", una área médica puede tener muchos médicos.  
+❖ Cardinalidad: 1-N (uno a muchos).  
+
+4. Área Médica – Personal de Enfermería  
+❖ Relación: "Asigna", una área médica puede tener muchos enfermeros.  
+❖ Cardinalidad: 1-N (uno a muchos).  
+
+5. Área Médica – Personal Administrativo  
+❖ Relación: "Asigna", una área médica puede tener muchos administrativos.  
+❖ Cardinalidad: 1-N (uno a muchos).  
+
+6. Personal Médico – Visita Médica  
+❖ Relación: "Atiende", un médico puede atender muchas visitas médicas.  
+❖ Cardinalidad: 1-N (uno a muchos).  
+
+7. Paciente – Visita Médica  
+❖ Relación: "Realiza", un paciente puede tener varias visitas médicas.  
+❖ Cardinalidad: 1-N (uno a muchos).  
+
+8. Personal Médico – Tratamiento Médico  
+❖ Relación: "Prescribe", un médico puede indicar muchos tratamientos.  
+❖ Cardinalidad: 1-N (uno a muchos).  
+
+9. Paciente – Tratamiento Médico  
+❖ Relación: "Recibe", un paciente puede recibir muchos tratamientos.  
+❖ Cardinalidad: 1-N (uno a muchos).  
+
+10. Tratamiento Médico – Medicamento  
+❖ Relación: "Incluye", un tratamiento puede incluir muchos medicamentos.  
+❖ Cardinalidad: 1-N (uno a muchos).  
+
+
+
+```erDiagram
+    HOSPITAL ||--o{ AREA_MEDICA : tiene
+    HOSPITAL ||--o{ PERSONAL_MANTENIMIENTO : tiene
+
+    AREA_MEDICA ||--o{ PERSONAL_MEDICO : asigna
+    AREA_MEDICA ||--o{ PERSONAL_ENFERMERIA : asigna
+    AREA_MEDICA ||--o{ PERSONAL_ADMINISTRATIVO : asigna
+
+    PERSONAL_MEDICO ||--o{ VISITA_MEDICA : atiende
+    PACIENTE ||--o{ VISITA_MEDICA : realiza
+
+    PERSONAL_MEDICO ||--o{ TRATAMIENTO_MEDICO : prescribe
+    PACIENTE ||--o{ TRATAMIENTO_MEDICO : recibe
+
+    TRATAMIENTO_MEDICO ||--o{ MEDICAMENTO : incluye
+
+    HOSPITAL {
+        string id_hospital PK
+        string nombre
+    }
+    AREA_MEDICA {
+        string id_area PK
+        string nombre
+        string id_hospital FK
+    }
+    PERSONAL_MEDICO {
+        string id PK
+        string nombre
+        string numero_colegiatura
+        string especialidad
+        string telefono
+        string correo
+        float salario
+        string id_area FK
+    }
+    PERSONAL_ENFERMERIA {
+        string id PK
+        string nombre
+        string telefono
+        string correo
+        float salario
+        string id_area FK
+    }
+    PERSONAL_ADMINISTRATIVO {
+        string id PK
+        string nombre
+        string area
+        string telefono
+        string correo
+        float salario
+        string id_area FK
+    }
+    PERSONAL_MANTENIMIENTO {
+        string id PK
+        string nombre
+        string tipo_servicio
+        string telefono
+        string correo
+        float salario
+        string id_hospital FK
+    }
+    PACIENTE {
+        string cedula PK
+        string nombre
+        string direccion
+        string telefono
+        string correo
+    }
+    VISITA_MEDICA {
+        string id PK
+        string id_paciente FK
+        string id_medico FK
+        date fecha
+        string motivo
+        string observaciones
+    }
+    TRATAMIENTO_MEDICO {
+        string id PK
+        string id_paciente FK
+        string id_medico FK
+        string diagnostico
+        string procedimiento
+        date fecha_inicio
+        date fecha_fin
+    }
+    MEDICAMENTO {
+        string id PK
+        string id_tratamiento FK
+        string nombre
+        string dosis
+        string frecuencia
+    }
+```
