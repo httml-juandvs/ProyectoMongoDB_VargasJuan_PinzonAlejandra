@@ -583,3 +583,104 @@ direction TB
 
 
 ```
+##Normalización
+```mermaid
+erDiagram
+	direction TB
+	HOSPITAL {
+		string id_hospital PK ""  
+		string nombre  ""  
+		string direccion  ""  
+		string ciudad  ""  
+		int telefono  ""  
+		int id_gerente FK ""  
+	}
+
+	GERENTE {
+		int id_gerente PK ""  
+		int id_empleado FK ""  
+	}
+
+	EMPLEADO {
+		int id_empleado PK ""  
+		string nombre  ""  
+		string correo  ""  
+		int telefono  ""  
+		int id_rol FK ""  
+		int id_area FK ""  
+		string id_hospital FK ""  
+	}
+
+	MEDICO {
+		string id_colegiatura PK ""  
+		string especialidad  ""  
+		double sueldo  ""  
+		int id_empleado FK ""  
+	}
+
+	AREA {
+		int id_area PK ""  
+		string nombre  ""  
+		string id_hospital FK ""  
+	}
+
+	PACIENTE {
+		int id_paciente PK ""  
+		string nombre  ""  
+		string direccion  ""  
+		int telefono  ""  
+		date fecha_nacimiento  ""  
+		int id_seguro  ""  
+		int id_historial FK ""  
+		string id_hospital FK ""  
+	}
+
+	HISTORIAL_CLINICO {
+		int id_historial PK ""  
+		int id_paciente FK ""  
+		string diagnostico  ""  
+		string resultado  ""  
+	}
+
+	VISITA_MEDICA {
+		int id_visita PK ""  
+		int id_paciente FK ""  
+		int id_medico FK ""  
+		date fecha  ""  
+		time hora  ""  
+		string diagnostico  ""  
+	}
+
+	TRATAMIENTO {
+		int id_tratamiento PK ""  
+		string nombre  ""  
+		string descripcion  ""  
+		int id_area FK ""  
+		int id_medico FK ""  
+		double costo  ""  
+	}
+
+	MEDICAMENTO {
+		int id_medicamento PK ""  
+		string nombre  ""  
+		string tipo  ""  
+		string fabricante  ""  
+		boolean disponibilidad  ""  
+	}
+
+	HOSPITAL||--o{AREA:"tiene"
+	HOSPITAL||--o{EMPLEADO:"emplea"
+	EMPLEADO||--||GERENTE:"es"
+	EMPLEADO||--||MEDICO:"especializa"
+	AREA||--o{MEDICO:"contiene"
+	PACIENTE}o--||HOSPITAL:"atiende"
+	PACIENTE||--||HISTORIAL_CLINICO:"historial"
+	HISTORIAL_CLINICO||--o{VISITA_MEDICA:"contiene"
+	VISITA_MEDICA}o--||MEDICO:"atiende"
+	VISITA_MEDICA}o--||PACIENTE:"paciente"
+	TRATAMIENTO}o--||AREA:"se_aplica_en"
+	TRATAMIENTO}o--||MEDICO:"responsable"
+	HISTORIAL_CLINICO}o--o{TRATAMIENTO:"incluye"
+	MEDICAMENTO||--|{TRATAMIENTO:"T"
+```
+
