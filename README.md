@@ -698,9 +698,62 @@ erDiagram
 Una tabla está en 2FN si cumple con los siguientes criterios: 
 ❖ Está en 1FN. 
 ❖ Todos los atributos no clave (no pertenecientes a una clave primaria compuesta) dependen completamente de la clave primaria. 
-Descripción 
+## Descripción 
 La segunda forma normal, es el segundo nivel de normalización en el diseño de la base de datos que se aplicará a las tablas de una base de datos que ya cumplen con la primera forma normal y lleva a cabo la eliminación de dependencias parciales dentro de una tabla. 
-Descripción Técnica 
+
+## Descripción Técnica 
+
+Se añadieron nuevas entidades y para un mejor manejo y evitar la repeticion de datos atomicos se dividio la entidad empleado en Personal Administrativo, Enfermeros y Personal de manteninimiento.
+Para evitar redundancias se implemento la entidad inventario para tener en cuenta la disponibilidad de cada medicamento.
+Y de acuerdo a los parametros del proyecto se añade una nueva entidad que sera seguro para los pacientes.
+
+
+1. *Hospital*
+❖ Se encuentra en 2FN, ya que tiene una clave primaria única (`id_hospital`) y todos los campos (`nombre`, `dirección`, `ciudad`, `teléfono`, `id_gerente`) dependen completamente de esta clave.
+
+2. *Gerente*  
+❖ Se encuentra en 2FN, con `id_gerente` como clave primaria, y `id_empleado` depende funcionalmente de ella sin generar redundancia.
+
+3. *Empleado*  
+❖ Se encuentra en 2FN, ya que `id_empleado` es la clave primaria y todos los campos (`nombre`, `correo`, `teléfono`, `id_rol`, `id_area`, `id_hospital`) dependen exclusivamente de ella.
+
+4. *Medico*  
+❖ Se encuentra en 2FN, con `id_colegiatura` como clave primaria. Sus atributos (`especialidad`, `sueldo`, `id_empleado`) dependen completamente de esta clave.
+
+5. *Enfermero*  
+❖ Se encuentra en 2FN, ya que utiliza `id_empleado` como clave primaria. No contiene atributos independientes, solo extiende la relación con EMPLEADO.
+
+6. *Personal_administrativo*  
+❖ Se encuentra en 2FN, también utiliza `id_empleado` como clave primaria, garantizando dependencia total de dicha clave.
+
+7. *Personal_mantenimiento*  
+❖ Se encuentra en 2FN, con `id_empleado` como clave primaria única. Su estructura cumple las condiciones de dependencia funcional completa.
+
+8. *Area*  
+❖ Se encuentra en 2FN, con `id_area` como clave primaria. Tanto el `nombre` como el `id_hospital` dependen directamente de esta clave.
+
+9. *Paciente*  
+❖ Se encuentra en 2FN, ya que `id_paciente` es clave primaria, y todos los atributos (`nombre`, `dirección`, `teléfono`, `fecha_nacimiento`, `id_seguro`, `id_historial`, `id_hospital`) dependen completamente de ella.
+
+10. *Seguro_medico*  
+❖ Se encuentra en 2FN, con `id_seguro` como clave primaria. Los campos `nombre` y `cobertura` dependen completamente de esta clave.
+
+11. *Historial_clinico*  
+❖ Se encuentra en 2FN, ya que su clave primaria `id_historial` determina completamente los atributos `id_paciente`, `diagnóstico` y `resultado`.
+
+12. *Visita_medica*  
+❖ Se encuentra en 2FN, con `id_visita` como clave primaria. Todos los campos (`id_paciente`, `id_medico`, `fecha`, `hora`, `diagnóstico`) dependen funcionalmente de ella.
+
+13. *Tratamiento*  
+❖ Se encuentra en 2FN, ya que `id_tratamiento` es clave primaria, y los campos (`nombre`, `descripción`, `id_area`, `id_medico`, `costo`) dependen completamente de ella.
+
+14. *Medicamento*  
+❖ Se encuentra en 2FN, con `id_medicamento` como clave primaria. Todos los atributos (`nombre`, `tipo`, `fabricante`, `disponibilidad`) dependen totalmente de esta clave.
+
+15. *Inventario*  
+❖ Se encuentra en 2FN, con `id_inventario` como clave primaria. Los campos (`id_hospital`, `id_medicamento`, `tipo`, `fabricante`, `disponibilidad`) dependen completamente de esta clave sin dependencia parcial.
+
+
 
 ```mermaid
 erDiagram
@@ -734,17 +787,31 @@ erDiagram
         double sueldo
         int id_empleado FK
     }
-
     ENFERMERO {
-        int id_empleado PK
+        string id PK
+        string nombre
+        string telefono
+        string correo
+        float salario
+        string id_area FK
     }
-
     PERSONAL_ADMINISTRATIVO {
-        int id_empleado PK
+        string id PK
+        string nombre
+        string area
+        string telefono
+        string correo
+        float salario
+        string id_area FK
     }
-
     PERSONAL_MANTENIMIENTO {
-        int id_empleado PK
+        string id PK
+        string nombre
+        string tipo_servicio
+        string telefono
+        string correo
+        float salario
+        string id_hospital FK
     }
 
     AREA {
