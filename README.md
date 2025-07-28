@@ -50,7 +50,7 @@
 
 <h3 align="center";>
 
-**RUTA NODE**
+**RUTA NODE JS**
 
 </h3>
 
@@ -293,96 +293,28 @@ Se definieron las siguientes relaciones entre entidades para representar el sist
 
 
 ```mermaid
-erDiagram
-    HOSPITAL ||--o{ AREA_MEDICA : tiene
-    HOSPITAL ||--o{ PERSONAL_MANTENIMIENTO : tiene
+flowchart TD
+    Medico["Medico"] --> M_nombre(("nombre")) & M_sueldo(("sueldo")) & M_correo(("correo")) & M_telefono(("telefono")) & M_especialidad(("especialidad")) & M_id_area(("id_area")) & M_id_colegiatura(("id_colegiatura"))
+    Empleado["Empleado"] --> E_id_empleado(("id_empleado")) & E_nombre(("nombre")) & E_correo(("correo")) & E_telefono(("telefono")) & E_id_area(("id_area")) & E_id_rol(("id_rol")) & E_id_hospital(("id_hospital"))
+    Gerente["Gerente"] --> G_id_empleado(("id_empleado")) & G_id_gerente(("id_gerente"))
+    Hospital["Hospital"] --> H_id_hospital(("id_hospital")) & H_nombre(("nombre")) & H_telefono(("telefono")) & H_ciudad(("ciudad")) & H_direccion(("direccion")) & H_id_gerente(("id_gerente"))
+    Paciente["Paciente"] --> P_id_paciente(("id_paciente")) & P_id_hospital(("id_hospital")) & P_telefono(("telefono")) & P_direccion(("direccion")) & P_id_seguro(("id_seguro")) & P_fecha_nacimiento(("fecha_nacimiento"))
+    Historial["Historial_clinico"] --> HC_id_historial(("id_historial")) & HC_id_paciente(("id_paciente")) & HC_id_visita(("id_visita")) & HC_id_tratamiento(("id_tratamiento")) & HC_diagnostico(("diagnostico")) & HC_resultado(("resultado"))
+    Visita["Visita_Medica"] --> V_id_visita(("id_visita")) & V_id_paciente(("id_paciente")) & V_id_medico(("id_medico")) & V_fecha(("fecha")) & V_hora(("hora")) & V_diagnostico(("diagnostico"))
+    Tratamiento["Tratamiento"] --> T_id_tratamiento(("id_tratamiento")) & T_id_medico(("id_medico")) & T_id_area(("id_area")) & T_nombre(("nombre")) & T_descripcion(("descripcion")) & T_costo(("costo")) & Medicamento["Medicamento"]
+    Medicamento --> MD_id_medicamento(("id_medicamento")) & MD_nombre(("nombre")) & MD_tipo(("tipo")) & MD_disponibilidad(("disponibilidad")) & MD_fabricante(("fabricante"))
+    Area["Area"] --> A_id_area(("id_area")) & A_nombre(("nombre")) & A_id_hospital(("id_hospital"))
+    Medico -- trabaja en --> Hospital
+    Empleado -- trabaja en --> Hospital
+    Gerente -- administra --> Hospital
+    Hospital -- contiene --> Area
+    Paciente -- asiste a --> Hospital
+    Paciente -- tiene --> Historial
+    Historial -- relacionado con --> Visita
+    Historial -- asocia --> Tratamiento
+    Visita -- realizada por --> Medico
+    Visita -- corresponde a --> Paciente
+    Tratamiento -- administrado por --> Medico
+    Tratamiento -- pertenece a --> Area
 
-    AREA_MEDICA ||--o{ PERSONAL_MEDICO : asigna
-    AREA_MEDICA ||--o{ PERSONAL_ENFERMERIA : asigna
-    AREA_MEDICA ||--o{ PERSONAL_ADMINISTRATIVO : asigna
-
-    PERSONAL_MEDICO ||--o{ VISITA_MEDICA : atiende
-    PACIENTE ||--o{ VISITA_MEDICA : realiza
-
-    PERSONAL_MEDICO ||--o{ TRATAMIENTO_MEDICO : prescribe
-    PACIENTE ||--o{ TRATAMIENTO_MEDICO : recibe
-
-    TRATAMIENTO_MEDICO ||--o{ MEDICAMENTO : incluye
-
-    HOSPITAL {
-        string id_hospital PK
-        string nombre
-    }
-    AREA_MEDICA {
-        string id_area PK
-        string nombre
-        string id_hospital FK
-    }
-    PERSONAL_MEDICO {
-        string id PK
-        string nombre
-        string numero_colegiatura
-        string especialidad
-        string telefono
-        string correo
-        float salario
-        string id_area FK
-    }
-    PERSONAL_ENFERMERIA {
-        string id PK
-        string nombre
-        string telefono
-        string correo
-        float salario
-        string id_area FK
-    }
-    PERSONAL_ADMINISTRATIVO {
-        string id PK
-        string nombre
-        string area
-        string telefono
-        string correo
-        float salario
-        string id_area FK
-    }
-    PERSONAL_MANTENIMIENTO {
-        string id PK
-        string nombre
-        string tipo_servicio
-        string telefono
-        string correo
-        float salario
-        string id_hospital FK
-    }
-    PACIENTE {
-        string cedula PK
-        string nombre
-        string direccion
-        string telefono
-        string correo
-    }
-    VISITA_MEDICA {
-        string id PK
-        string id_paciente FK
-        string id_medico FK
-        date fecha
-        string motivo
-        string observaciones
-    }
-    TRATAMIENTO_MEDICO {
-        string id PK
-        string id_paciente FK
-        string id_medico FK
-        string diagnostico
-        string procedimiento
-        date fecha_inicio
-        date fecha_fin
-    }
-    MEDICAMENTO {
-        string id PK
-        string id_tratamiento FK
-        string nombre
-        string dosis
-        string frecuencia
-    }
 ```
