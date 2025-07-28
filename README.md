@@ -583,7 +583,17 @@ direction TB
 
 
 ```
-##Normalización
+## Normalización del Modelo Lógico 
+
+Se realizó el proceso de la normalización de las tablas anteriormente visualizadas para organizar los datos de manera más eficiente,minimizando redundancias y dependencias transitivas en la base de datos en desarrollo. 
+Primera Forma Normal (1FN) 
+Una tabla está en 1FN si cumple con los siguientes criterios: 
+- Todos los atributos contienen valores atómicos (indivisibles). 
+- No debe haber grupos repetitivos de columnas. 
+- Cada columna debe contener un solo valor en cada fila. 
+Descripción 
+La primera forma normal, es el primer nivel de normalización en el diseño de la base de datos que se aplicará a las tablas de la base de datos para garantizar la organización de los datos de manera que evite redundancias y asegure la consistencia de la información. 
+
 ```mermaid
 erDiagram
 	direction TB
