@@ -321,7 +321,126 @@ flowchart TD
 ```
 ## Construcción del Modelo Lógico 
 
-Se ha diseñado el modelo lógico teniendo en cuenta el modelo conceptual, incorporando detalles más específicos como las características de cada atributo, incluidas las claves primarias, foráneas y las relaciones de cardinalidad.
+Se ha diseñado el modelo lógico teniendo en cuenta el modelo conceptual, incorporando detalles más específicos como las características de cada atributo, incluidas las claves primarias, foráneas y las relaciones de cardinalidad correspondientes a cada entidad y sus respectivos atributos dependiendo  .
+
+*1. Hospital*
+- `id_hospital`: INT AUTO_INCREMENT PRIMARY KEY  
+- `nombre`: VARCHAR(100) NOT NULL  
+- `direccion`: VARCHAR(150) NOT NULL  
+- `ciudad`: VARCHAR(100) NOT NULL  
+- `telefono`: VARCHAR(20) NOT NULL  
+- `id_gerente`: INT NOT NULL FOREIGN KEY  
+
+*2. Gerente*
+- `id_gerente`: INT AUTO_INCREMENT PRIMARY KEY
+-  `id_empleado`: INT NOT NULL FOREIGN KEY  
+
+*3. Empleado*
+- `id_empleado`: INT AUTO_INCREMENT PRIMARY KEY  
+- `nombre`: VARCHAR(100) NOT NULL  
+- `correo`: VARCHAR(100) NOT NULL  
+- `telefono`: VARCHAR(20)  
+- `id_rol`: INT NOT NULL FOREIGN KEY  
+- `id_area`: INT FOREIGN KEY  
+- `id_hospital`: INT NOT NULL FOREIGN KEY  
+
+*4. Medico*
+- `id_colegiatura`: INT PRIMARY KEY  
+- `nombre`: VARCHAR(100) NOT NULL  
+- `especialidad`: VARCHAR(100) NOT NULL  
+- `telefono`: VARCHAR(20)  
+- `correo`: VARCHAR(100)  
+- `sueldo`: DECIMAL(10,2)  
+- `id_area`: INT NOT NULL FOREIGN KEY  
+
+*5. Area*
+- `id_area`: INT AUTO_INCREMENT PRIMARY KEY  
+- `id_hospital`: INT NOT NULL FOREIGN KEY  
+- `nombre`: VARCHAR(100) NOT NULL  
+
+*6. Paciente*
+- `id_paciente`: INT AUTO_INCREMENT PRIMARY KEY  
+- `nombre`: VARCHAR(100) NOT NULL  
+- `direccion`: VARCHAR(150) NOT NULL  
+- `telefono`: VARCHAR(20)  
+- `fecha_nacimiento`: DATE NOT NULL  
+- `id_seguro`: INT NOT NULL FOREIGN KEY  
+- `id_historial`: INT NOT NULL FOREIGN KEY  
+- `id_hospital`: INT NOT NULL FOREIGN KEY  
+
+*7. historial_clinico*
+- `id_historial`: INT AUTO_INCREMENT PRIMARY KEY
+-  `id_paciente`: INT NOT NULL FOREIGN KEY  
+- `id_visita`: INT NOT NULL FOREIGN KEY  
+- `id_tratamiento`: INT NOT NULL FOREIGN KEY  
+- `diagnostico`: TEXT  
+- `resultado`: TEXT  
+
+*8. visita_medica*
+- `id_visita`: INT AUTO_INCREMENT PRIMARY KEY
+-  `id_paciente`: INT NOT NULL FOREIGN KEY  
+- `id_medico`: INT NOT NULL FOREIGN KEY  
+- `fecha`: DATE NOT NULL
+- `hora`: TIME NOT NULL  
+- `diagnostico`: TEXT  
+
+*9. tratamiento*
+- `id_tratamiento`: INT AUTO_INCREMENT PRIMARY KEY  
+- `nombre`: VARCHAR(100) NOT NULL  
+- `descripcion`: TEXT  
+- `id_area`: INT NOT NULL FOREIGN KEY  
+- `id_medico`: INT NOT NULL FOREIGN KEY  
+- `costo`: DECIMAL(10,2) NOT NULL  
+
+* 10. medicamento*
+- `id_medicamento`: INT AUTO_INCREMENT PRIMARY KEY  
+- `nombre`: VARCHAR(100) NOT NULL  
+- `tipo`: ENUM('Genérico', 'Especializado') NOT NULL  
+- `fabricante`: VARCHAR(100) NOT NULL  
+- `disponibilidad`: INT(5) NOT NULL  
+
+## Relaciones y Cardinalidades
+
+1. `hospital` "1" — "N" `area`  
+   → Un hospital **tiene muchas** áreas.
+
+2. `hospital` "1" — "N" `empleado`  
+   → Un hospital **emplea muchos** empleados.
+
+3. `empleado` "1" — "1" `gerente`  
+   → Un gerente **es un empleado**.
+
+4. `area` "1" — "N" `medico`  
+   → Un área **contiene muchos** médicos.
+
+5. `paciente` "N" — "1" `hospital`  
+   → Un paciente **es atendido en un** hospital.
+
+6. `paciente` "1" — "1" `historial_clinico`  
+   → Un paciente **tiene un solo** historial clínico.
+
+7. `historial_clinico` "1" — "N" `visita_medica`  
+   → Un historial **incluye muchas** visitas.
+
+8. `visita_medica` "N" — "1" `medico`  
+   → Muchas visitas **son atendidas por un** médico.
+
+9. `visita_medica` "N" — "1" `paciente`  
+   → Muchas visitas **pertenecen a un** paciente.
+
+10. `tratamiento` "N" — "1" `area`  
+   → Muchos tratamientos **corresponden a una** área.
+
+11. `tratamiento` "N" — "1" `medico`  
+   → Muchos tratamientos **son prescritos por un** médico.
+
+12. `historial_clinico` "N" — "N" `tratamiento`  
+   → Un historial puede **tener muchos tratamientos** y un tratamiento **puede estar en muchos historiales**.
+
+13. `medicamento` "N" — "1" `tratamiento`  
+   → Muchos medicamentos **se asocian a un** tratamiento.
+
+---
 
 ```mermaid
 classDiagram
