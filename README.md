@@ -175,77 +175,78 @@ Para entender el diseño del modelo conceptual, se debe tener en cuenta los elem
 *1. Hospital*
 - `id_hospital`: ID único del hospital.
 - `nombre`: Nombre del hospital.
+- `direccion`: Dirección del hospital.
+- `ciudad`: Ciudad donde se ubica el hospital.
+- `telefono`: Número de teléfono del hospital.
+- `id_gerente`: ID del gerente responsable del hospital.
 
-*2. Área Médica*
-- `id_area`: ID único del área.
-- `id_hospital`: Hospital al que pertenece.
-- `nombre`: Nombre del área médica (cardiología, neurología, etc.).
+*2. Gerente*
+- `id_gerente`: ID único del gerente.
+- `id_empleado`: ID del empleado que desempeña el rol de gerente.
 
-*3. Personal Médico*
-- `id`: ID único del personal médico.
-- `numero_colegiatura`: Número de colegiatura médica.
-- `nombre`: Nombre completo.
+*3. Empleado*
+- `id_empleado`: ID único del empleado.
+- `nombre`: Nombre completo del empleado.
+- `correo`: Correo electrónico.
+- `telefono`: Número de teléfono.
+- `id_rol`: ID del rol desempeñado.
+- `id_area`: ID del área de trabajo.
+- `id_hospital`: ID del hospital donde labora.
+
+*4. Médico*
+- `id_colegiatura`: Número único de colegiatura.
+- `nombre`: Nombre completo del médico.
 - `especialidad`: Especialidad médica.
-- `teléfono`: Número de celular.
-- `correo`: Dirección de correo electrónico.
-- `salario`: Salario.
+- `telefono`: Número de contacto.
+- `correo`: Correo electrónico.
+- `sueldo`: Sueldo asignado.
+- `id_area`: ID del área médica donde labora.
 
-*4. Personal de Enfermería*
-- `id`: ID único.
-- `id_personal`: ID del personal.
+*5. Área Médica*
+- `id_area`: ID único del área.
+- `id_hospital`: ID del hospital al que pertenece.
+- `nombre`: Nombre del área médica (Cardiología, Pediatría, etc.).
+
+*6. Paciente*
+- `id_paciente`: ID único del paciente.
 - `nombre`: Nombre completo.
-- `teléfono`: Número de celular.
-- `correo`: Dirección de correo electrónico.
-- `salario`: Salario.
+- `direccion`: Dirección de residencia.
+- `telefono`: Número de contacto.
+- `fecha_nacimiento`: Fecha de nacimiento.
+- `id_seguro`: ID del seguro médico.
+- `id_historial`: ID del historial clínico.
+- `id_hospital`: ID del hospital asignado.
 
-*5. Personal Administrativo*
-- `id`: ID único.
-- `id_personal`: ID del personal.
-- `area`: Área administrativa en la que labora.
-- `nombre`: Nombre completo.
-- `teléfono`: Número de celular.
-- `correo`: Dirección de correo electrónico.
-- `salario`: Salario.
+*7. Historial Clínico*
+- `id_historial`: ID único del historial clínico.
+- `id_paciente`: ID del paciente asociado.
+- `id_visita`: ID de la visita médica.
+- `id_tratamiento`: ID del tratamiento aplicado.
+- `diagnostico`: Diagnóstico realizado.
+- `resultado`: Resultado del tratamiento.
 
-*6. Personal de Mantenimiento*
-- `id`: ID único.
-- `id_personal`: ID del personal.
-- `tipo_servicio`: Tipo de servicio prestado (limpieza, eléctrico, etc.).
-- `nombre`: Nombre completo.
-- `teléfono`: Número de celular.
-- `correo`: Dirección de correo electrónico.
-- `salario`: Salario.
-
-*7. Paciente*
-- `cedula`: Cédula del paciente.
-- `nombre`: Nombre completo.
-- `direccion`: Dirección.
-- `teléfono`: Número de celular.
-- `correo`: Dirección de correo electrónico.
-
-*8. Tratamiento Médico*
-- `id`: ID único de ltratamiento.
+*8. Visita Médica*
+- `id_visita`: ID único de la visita.
 - `id_paciente`: ID del paciente.
-- `id_medico`: ID del médico tratante.
-- `diagnostico`: Descripción del diagnóstico.
-- `procedimiento`: Procedimientos realizados.
-- `fecha_inicio`: Fecha de inicio.
-- `fecha_fin`: Fecha de finalización (opcional).
+- `id_medico`: ID del médico que atendió.
+- `fecha`: Fecha de la visita.
+- `hora`: Hora de la visita.
+- `diagnostico`: Diagnóstico médico emitido.
 
-*9. Medicamento*
-- `id`: ID único del medicamento recetado.
-- `id_tratamiento`: ID del tratamiento.
+*9. Tratamiento*
+- `id_tratamiento`: ID único del tratamiento.
+- `nombre`: Nombre del tratamiento.
+- `descripcion`: Descripción detallada.
+- `id_area`: ID del área médica responsable.
+- `id_medico`: ID del médico responsable.
+- `costo`: Costo asociado.
+
+*10. Medicamento*
+- `id_medicamento`: ID único del medicamento.
 - `nombre`: Nombre del medicamento.
-- `dosis`: Dosis indicada.
-- `frecuencia`: Frecuencia de administración.
-
-*10. Visita Médica*
-- `id`: ID único de la visita.
-- `id_paciente`: ID del paciente.
-- `id_medico`: ID del médico.
-- `fecha`: Fecha de la consulta.
-- `motivo`: Motivo de la visita.
-- `observaciones`: Observaciones médicas.
+- `tipo`: Tipo (genérico, especializado, etc.).
+- `fabricante`: Fabricante del medicamento.
+- `disponibilidad`: Cantidad disponible en stock.
 
 ### Relaciones y Cardinalidades del Modelo Conceptual
 
@@ -316,5 +317,150 @@ flowchart TD
     Visita -- corresponde a --> Paciente
     Tratamiento -- administrado por --> Medico
     Tratamiento -- pertenece a --> Area
+
+```
+## Construcción del Modelo Lógico 
+
+Se ha diseñado el modelo lógico teniendo en cuenta el modelo conceptual, incorporando detalles más específicos como las características de cada atributo, incluidas las claves primarias, foráneas y las relaciones de cardinalidad.
+
+```mermaid
+classDiagram
+direction TB
+    class Hospital {
+        id_hospital
+        nombre
+        direccion
+        ciudad
+        telefono
+        id_gerente
+    }
+
+
+    class Gerente {
+        id_gerente
+        id_empleado
+    }
+
+
+    class Empleado {
+        id_empleado
+        nombre
+        correo
+        telefono
+        id_rol
+        id_area
+        id_hospital
+    }
+
+
+    class Rol {
+        id_rol
+        nombre_rol
+        descripcion
+    }
+
+
+    class Medico {
+        id_colegiatura
+        nombre
+        especialidad
+        telefono
+        correo
+        sueldo
+        id_area
+    }
+
+
+    class Area {
+        id_area
+        id_hospital
+        nombre
+    }
+
+
+    class Paciente {
+        id_paciente
+        nombre
+        direccion
+        telefono
+        fecha_nacimiento
+        id_seguro
+        id_historial
+        id_hospital
+    }
+
+
+    class Historial_clinico {
+        id_historial
+        id_paciente
+        id_visita
+        id_tratamiento
+        diagnostico
+        resultado
+    }
+
+
+    class Visita_Medica {
+        id_visita
+        id_paciente
+        id_medico
+        fecha
+        hora
+        diagnostico
+    }
+
+
+    class Tratamiento {
+        id_tratamiento
+        nombre
+        descripcion
+        id_area
+        id_medico
+        costo
+    }
+
+
+    class Prescripcion {
+        id_tratamiento
+        id_medicamento
+        dosis
+        diagnostico
+    }
+
+
+    class Medicamento {
+        id_medicamento
+        nombre
+        tipo
+        fabricante
+        disponibilidad
+    }
+
+
+    class Inventario {
+        id_hospital
+        tipo
+        disponibilidad
+    }
+
+
+    Hospital "1" o-- "*" Area : tiene
+    Hospital "1" o-- "*" Empleado : emplea
+    Empleado "*" o-- "1" Rol : rol
+    Empleado "1" o-- "1" Gerente : gerente
+    Area "1" o-- "*" Medico : contiene
+    Paciente "*" o-- "1" Hospital : atiende
+    Paciente "1" o-- "1" Historial_clinico : historial
+    Historial_clinico "1" o-- "*" Visita_Medica : visita
+    Visita_Medica "*" o-- "1" Medico : atiende
+    Visita_Medica "*" o-- "1" Paciente : paciente
+    Tratamiento "*" o-- "1" Area : area
+    Tratamiento "*" o-- "1" Medico : responsable
+    Historial_clinico "*" o-- "*" Tratamiento : tratamiento
+    Prescripcion "*" o-- "1" Tratamiento : tratamiento
+    Prescripcion "*" o-- "1" Medicamento : medicamento
+    Inventario "*" o-- "*" Medicamento : inventario
+    Inventario "1" o-- "1" Hospital : hospital
+
 
 ```
