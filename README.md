@@ -1047,8 +1047,8 @@ erDiagram
         string descripcion
     }
 
-    rango_etario {
-        int id_rango_etario PK
+    rango_edad{
+        int id_rango_edad PK
         string descripcion
     }
 
@@ -1118,7 +1118,7 @@ erDiagram
     paciente }o--|| hospital : atiende
     paciente ||--|| historial_clinico : historial
     paciente }o--|| genero : tiene
-    paciente }o--|| rango_etario : pertenece
+    paciente }o--|| rango_edad : pertenece
     paciente }o--|| seguro_medico : asegurado
     seguro_medico }o--|| tipo_seguro : clasifica
     historial_clinico ||--o{ visita_medica : contiene
