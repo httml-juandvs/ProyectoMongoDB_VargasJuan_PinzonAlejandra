@@ -906,6 +906,228 @@ erDiagram
 Una tabla está en 3NF si cumple con los siguientes criterios: 
 - Está en 2NF. 
 - No hay dependencias transitivas: ningún atributo no clave depende de otro atributo no clave. 
-Descripción 
+## Descripción 
 La tercera forma normal, es el tercer nivel de normalización en el diseño de la base de datos que se aplicará a las tablas de una base de datos que ya cumplen con la segunda forma normal y se enfoca en la eliminación de dependencias transitivas, evitando que un atributo no clave dependa de otro no clave. 
 
+1. **hospital**  
+❖ Se encuentra en 3FN, ya que todos sus atributos dependen únicamente de la clave primaria (`id_hospital`), y no existen dependencias transitivas.
+
+2. **gerente**  
+❖ Se encuentra en 3FN, con clave primaria (`id_gerente`). El atributo `id_empleado` depende directamente de esta clave.
+
+3. **empleado**  
+❖ Cumple 3FN, con `id_empleado` como clave primaria y todos los campos (`nombre`, `correo`, `telefono`, `id_rol`, `id_area`, `id_hospital`) dependen solo de esta clave.
+
+4. **medico**  
+❖ Está en 3FN, ya que cada campo (`nombre`, `numero_colegiatura`, `especialidad`, `telefono`, `correo`, `salario`, `id_area`) depende solo de la clave primaria (`id`).
+
+5. **enfermero**, **personal_administrativo**, **personal_mantenimiento**  
+❖ Cada una de estas entidades está en 3FN, con sus atributos dependiendo únicamente de su clave primaria (`id`). No existen dependencias transitivas.
+
+6. **area**  
+❖ Se encuentra en 3FN, ya que tanto el `nombre` como el `id_hospital` dependen únicamente del `id_area`.
+
+7. **paciente**  
+❖ Cumple 3FN: todos sus campos (`nombre`, `direccion`, `telefono`, `fecha_nacimiento`, `id_genero`, `id_rango_etario`, `id_seguro`, `id_historial`, `id_hospital`) dependen exclusivamente de la clave primaria (`id_paciente`). Además, `id_genero`, `id_rango_etario` y `id_seguro` son referencias a entidades independientes, eliminando dependencias transitivas.
+
+8. **genero**  
+❖ Se encuentra en 3FN. Cada descripción depende de la clave primaria (`id_genero`).
+
+9. **rango_etario**  
+❖ Cumple 3FN, la descripción depende solo de la clave (`id_rango_etario`).
+
+10. **seguro_medico**  
+❖ Se encuentra en 3FN, con todos sus campos dependiendo de la clave primaria (`id_seguro`). El tipo de seguro se gestiona mediante la referencia a `id_tipo_seguro`, evitando dependencias transitivas.
+
+11. **tipo_seguro**  
+❖ Está en 3FN, con la descripción dependiendo de la clave (`id_tipo_seguro`).
+
+12. **historial_clinico**  
+❖ Cumple 3FN: sus atributos (`id_paciente`, `diagnostico`, `resultado`) dependen solo de la clave (`id_historial`).
+
+13. **visita_medica**  
+❖ Está en 3FN, todos los campos (`id_paciente`, `id_medico`, `fecha`, `hora`, `diagnostico`) dependen de la clave (`id_visita`).
+
+14. **tratamiento**  
+❖ Cumple 3FN: los campos (`nombre`, `descripcion`, `id_area`, `id_medico`, `costo`) dependen únicamente de `id_tratamiento`.
+
+15. **medicamento**  
+❖ Se encuentra en 3FN: todos los campos (`nombre`, `tipo`, `fabricante`, `disponibilidad`) dependen de `id_medicamento`.
+
+16. **inventario**  
+❖ Está en 3FN, ya que todos los atributos (`id_hospital`, `id_medicamento`, `tipo`, `fabricante`, `disponibilidad`) dependen directamente de la clave primaria (`id_inventario`).
+
+```mermaid
+erDiagram
+    hospital {
+        string id_hospital PK
+        string nombre
+        string direccion
+        string ciudad
+        int telefono
+        int id_gerente FK
+    }
+
+    gerente {
+        int id_gerente PK
+        int id_empleado FK
+    }
+
+    empleado {
+        int id_empleado PK
+        string nombre
+        string correo
+        int telefono
+        int id_rol FK
+        int id_area FK
+        string id_hospital FK
+    }
+
+    medico {
+        string id PK
+        string nombre
+        string numero_colegiatura
+        string especialidad
+        string telefono
+        string correo
+        float salario
+        string id_area FK
+    }
+
+    enfermero {
+        string id PK
+        string nombre
+        string telefono
+        string correo
+        float salario
+        string id_area FK
+    }
+
+    personal_administrativo {
+        string id PK
+        string nombre
+        string area
+        string telefono
+        string correo
+        float salario
+        string id_area FK
+    }
+
+    personal_mantenimiento {
+        string id PK
+        string nombre
+        string tipo_servicio
+        string telefono
+        string correo
+        float salario
+        string id_hospital FK
+    }
+
+    area {
+        int id_area PK
+        string nombre
+        string id_hospital FK
+    }
+
+    paciente {
+        int id_paciente PK
+        string nombre
+        string direccion
+        int telefono
+        date fecha_nacimiento
+        int id_genero FK
+        int id_rango_etario FK
+        int id_seguro FK
+        int id_historial FK
+        string id_hospital FK
+    }
+
+    genero {
+        int id_genero PK
+        string descripcion
+    }
+
+    rango_etario {
+        int id_rango_etario PK
+        string descripcion
+    }
+
+    seguro_medico {
+        int id_seguro PK
+        string nombre
+        int id_tipo_seguro FK
+        string cobertura
+    }
+
+    tipo_seguro {
+        int id_tipo_seguro PK
+        string descripcion
+    }
+
+    historial_clinico {
+        int id_historial PK
+        int id_paciente FK
+        string diagnostico
+        string resultado
+    }
+
+    visita_medica {
+        int id_visita PK
+        int id_paciente FK
+        int id_medico FK
+        date fecha
+        time hora
+        string diagnostico
+    }
+
+    tratamiento {
+        int id_tratamiento PK
+        string nombre
+        string descripcion
+        int id_area FK
+        int id_medico FK
+        double costo
+    }
+
+    medicamento {
+        int id_medicamento PK
+        string nombre
+        string tipo
+        string fabricante
+        boolean disponibilidad
+    }
+
+    inventario {
+        int id_inventario PK
+        string id_hospital FK
+        int id_medicamento FK
+        string tipo
+        string fabricante
+        int disponibilidad
+    }
+
+    %% Relaciones
+    hospital ||--o{ area : tiene
+    hospital ||--o{ empleado : emplea
+    empleado ||--|| gerente : es
+    empleado ||--|| medico : especializa
+    empleado ||--|| enfermero : clasifica
+    empleado ||--|| personal_administrativo : clasifica
+    empleado ||--|| personal_mantenimiento : clasifica
+    area ||--o{ medico : contiene
+    paciente }o--|| hospital : atiende
+    paciente ||--|| historial_clinico : historial
+    paciente }o--|| genero : tiene
+    paciente }o--|| rango_etario : pertenece
+    paciente }o--|| seguro_medico : asegurado
+    seguro_medico }o--|| tipo_seguro : clasifica
+    historial_clinico ||--o{ visita_medica : contiene
+    visita_medica }o--|| medico : atiende
+    visita_medica }o--|| paciente : paciente
+    tratamiento }o--|| area : se_aplica_en
+    tratamiento }o--|| medico : responsable
+    historial_clinico }o--o{ tratamiento : incluye
+    medicamento ||--|{ tratamiento : usa
+    inventario ||--|| hospital : pertenece
+    inventario ||--|| medicamento : contiene
+```
