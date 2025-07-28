@@ -694,3 +694,151 @@ erDiagram
 	MEDICAMENTO||--|{TRATAMIENTO:"T"
 ```
 
+## Segunda Forma Normal (2FN) 
+Una tabla está en 2FN si cumple con los siguientes criterios: 
+❖ Está en 1FN. 
+❖ Todos los atributos no clave (no pertenecientes a una clave primaria compuesta) dependen completamente de la clave primaria. 
+Descripción 
+La segunda forma normal, es el segundo nivel de normalización en el diseño de la base de datos que se aplicará a las tablas de una base de datos que ya cumplen con la primera forma normal y lleva a cabo la eliminación de dependencias parciales dentro de una tabla. 
+Descripción Técnica 
+
+```mermaid
+erDiagram
+    HOSPITAL {
+        string id_hospital PK
+        string nombre
+        string direccion
+        string ciudad
+        int telefono
+        int id_gerente FK
+    }
+
+    GERENTE {
+        int id_gerente PK
+        int id_empleado FK
+    }
+
+    EMPLEADO {
+        int id_empleado PK
+        string nombre
+        string correo
+        int telefono
+        int id_rol FK
+        int id_area FK
+        string id_hospital FK
+    }
+
+    MEDICO {
+        string id_colegiatura PK
+        string especialidad
+        double sueldo
+        int id_empleado FK
+    }
+
+    ENFERMERO {
+        int id_empleado PK
+    }
+
+    PERSONAL_ADMINISTRATIVO {
+        int id_empleado PK
+    }
+
+    PERSONAL_MANTENIMIENTO {
+        int id_empleado PK
+    }
+
+    AREA {
+        int id_area PK
+        string nombre
+        string id_hospital FK
+    }
+
+    PACIENTE {
+        int id_paciente PK
+        string nombre
+        string direccion
+        int telefono
+        date fecha_nacimiento
+        int id_seguro FK
+        int id_historial FK
+        string id_hospital FK
+    }
+
+    SEGURO_MEDICO {
+        int id_seguro PK
+        string nombre
+        string cobertura
+    }
+
+    HISTORIAL_CLINICO {
+        int id_historial PK
+        int id_paciente FK
+        string diagnostico
+        string resultado
+    }
+
+    VISITA_MEDICA {
+        int id_visita PK
+        int id_paciente FK
+        int id_medico FK
+        date fecha
+        time hora
+        string diagnostico
+    }
+
+    TRATAMIENTO {
+        int id_tratamiento PK
+        string nombre
+        string descripcion
+        int id_area FK
+        int id_medico FK
+        double costo
+    }
+
+    MEDICAMENTO {
+        int id_medicamento PK
+        string nombre
+        string tipo
+        string fabricante
+        boolean disponibilidad
+    }
+
+    INVENTARIO {
+        int id_inventario PK
+        string id_hospital FK
+        int id_medicamento FK
+        string tipo
+        string fabricante
+        int disponibilidad
+    }
+
+    HOSPITAL ||--o{ AREA : tiene
+    HOSPITAL ||--o{ EMPLEADO : emplea
+    EMPLEADO ||--|| GERENTE : es
+    EMPLEADO ||--|| MEDICO : especializa
+    EMPLEADO ||--|| ENFERMERO : clasifica
+    EMPLEADO ||--|| PERSONAL_ADMINISTRATIVO : clasifica
+    EMPLEADO ||--|| PERSONAL_MANTENIMIENTO : clasifica
+    AREA ||--o{ MEDICO : contiene
+    PACIENTE }o--|| HOSPITAL : atiende
+    PACIENTE ||--|| HISTORIAL_CLINICO : historial
+    PACIENTE }o--|| SEGURO_MEDICO : asegurado
+    HISTORIAL_CLINICO ||--o{ VISITA_MEDICA : contiene
+    VISITA_MEDICA }o--|| MEDICO : atiende
+    VISITA_MEDICA }o--|| PACIENTE : paciente
+    TRATAMIENTO }o--|| AREA : se_aplica_en
+    TRATAMIENTO }o--|| MEDICO : responsable
+    HISTORIAL_CLINICO }o--o{ TRATAMIENTO : incluye
+    MEDICAMENTO ||--|{ TRATAMIENTO : usa
+    INVENTARIO ||--|| HOSPITAL : pertenece
+    INVENTARIO ||--|| MEDICAMENTO : contiene
+
+```
+
+## Tercera Forma Normal (3FN) 
+Una tabla está en 3NF si cumple con los siguientes criterios: 
+- Está en 2NF. 
+- No hay dependencias transitivas: ningún atributo no clave depende de otro atributo no clave. 
+Descripción 
+La tercera forma normal, es el tercer nivel de normalización en el diseño de la base de datos que se aplicará a las tablas de una base de datos que ya cumplen con la segunda forma normal y se enfoca en la eliminación de dependencias transitivas, evitando que un atributo no clave dependa de otro no clave. 
+
