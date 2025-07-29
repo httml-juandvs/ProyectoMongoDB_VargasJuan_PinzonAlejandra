@@ -594,6 +594,40 @@ Una tabla está en 1FN si cumple con los siguientes criterios:
 Descripción 
 La primera forma normal, es el primer nivel de normalización en el diseño de la base de datos que se aplicará a las tablas de la base de datos para garantizar la organización de los datos de manera que evite redundancias y asegure la consistencia de la información. 
 
+*1.Hospital*
+❖ Se encuentra en 1FN. Tiene una clave primaria única (`id_hospital`) y todos los campos (`nombre`, `dirección`, `ciudad`, `teléfono`, `id_gerente`) contienen valores atómicos y no se repiten.
+
+*2.Gerente*  
+❖ Cumple 1FN con `id_gerente` como clave primaria. El campo `id_empleado` es único por fila, sin repeticiones ni multivalores.
+
+*3.Empleado*  
+❖ Cumple 1FN. `id_empleado` es la clave primaria y todos los campos (`nombre`, `correo`, `teléfono`, `id_rol`, `id_area`, `id_hospital`) son indivisibles y no repetitivos.
+
+*4.Medico*  
+❖ En 1FN. Tiene como clave primaria `id_colegiatura` y los atributos `especialidad`, `sueldo`, `id_empleado` son valores atómicos.
+
+*5.area*  
+❖ Cumple con 1FN. Usa `id_area` como clave primaria. Sus atributos `nombre` y `id_hospital` son únicos y atómicos por fila.
+
+*6.Paciente*  
+❖ Está en 1FN. `id_paciente` es clave primaria y cada uno de sus atributos (`nombre`, `dirección`, `teléfono`, `fecha_nacimiento`, `id_seguro`, `id_historial`, `id_hospital`) es indivisible.
+
+*7.Historial_clinico*  
+❖ Satisface la 1FN. `id_historial` es clave única y sus campos (`id_paciente`, `diagnóstico`, `resultado`) no contienen listas ni valores múltiples.
+
+*8.Visita_medica*  
+❖ Se encuentra en 1FN. `id_visita` es la clave primaria. Atributos como `fecha`, `hora`, `diagnóstico`, `id_paciente` y `id_medico` contienen valores individuales.
+
+*9.Tratamiento*  
+❖ Cumple 1FN. La clave es `id_tratamiento`, y los atributos (`nombre`, `descripción`, `id_area`, `id_medico`, `costo`) no están repetidos ni contienen múltiples valores por celda.
+
+*10.Medicamento*  
+❖ Está en 1FN. Usa `id_medicamento` como clave primaria. Los campos (`nombre`, `tipo`, `fabricante`, `disponibilidad`) son únicos por fila y atómicos.
+
+*11.Inventario*  
+❖ Se encuentra en 1FN. Tiene como clave `id_inventario`. Los atributos (`id_hospital`, `id_medicamento`, `tipo`, `fabricante`, `disponibilidad`) no se repiten ni agrupan valores.
+
+
 ```mermaid
 erDiagram
 	direction TB
@@ -602,7 +636,7 @@ erDiagram
 		string nombre  ""  
 		string direccion  ""  
 		string ciudad  ""  
-		int telefono  ""  
+		string telefono  ""  
 		int id_gerente FK ""  
 	}
 
@@ -762,7 +796,7 @@ erDiagram
         string nombre
         string direccion
         string ciudad
-        int telefono
+        string telefono
         int id_gerente FK
     }
 
@@ -933,8 +967,8 @@ La tercera forma normal, es el tercer nivel de normalización en el diseño de l
 8. **genero**  
 ❖ Se encuentra en 3FN. Cada descripción depende de la clave primaria (`id_genero`).
 
-9. **rango_etario**  
-❖ Cumple 3FN, la descripción depende solo de la clave (`id_rango_etario`).
+9. **rango_edad**  
+❖ Cumple 3FN, la descripción depende solo de la clave (`id_rango_edad`).
 
 10. **seguro_medico**  
 ❖ Se encuentra en 3FN, con todos sus campos dependiendo de la clave primaria (`id_seguro`). El tipo de seguro se gestiona mediante la referencia a `id_tipo_seguro`, evitando dependencias transitivas.
@@ -1008,7 +1042,7 @@ erDiagram
         string nombre
         string area
         string telefono
-        string correo
+        string correo66
         float salario
         string id_area FK
     }
