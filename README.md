@@ -78,19 +78,7 @@
 - [Modelo Conceptual](#Construcción-del-Modelo-Conceptual)
 - [Construcción del Modelo Lógico](#construcción-del-modelo-lógico)
 - [Normalización del Modelo Lógico](#normalización-del-modelo-lógico)
-- [Modelo Entidad-Relación (ER)](#modelo-entidad-relación-er)
-- [Descripción de Entidades y Relaciones](#descripción-de-entidades-y-relaciones)
-- [Estructura del Repositorio](#estructura-del-repositorio)
-- [Requisitos del Sistema](#requisitos-del-sistema)
-- [Instalación y Configuración](#instalación-y-configuración)
-- [Carga de Datos y Scripts](#carga-de-datos-y-scripts)
-- [Ejemplos de Consultas MongoDB](#ejemplos-de-consultas-mongodb)
-- [Funciones JavaScript (UDF)](#funciones-javascript-udf)
-- [Control de Acceso y Roles de Usuario](#control-de-acceso-y-roles-de-usuario)
-- [Gestión de Permisos y Seguridad](#gestión-de-permisos-y-seguridad)
-- [Estructura de Carpetas y Archivos](#estructura-de-carpetas-y-archivos)
-- [Contribuciones](#contribuciones)
-- [Licencia y Contacto](#licencia-y-contacto)   
+- [Control de Acceso y Roles de Usuario](#Control-de-acceso-y-roles-de-datos)
 
 ---
 
@@ -1179,4 +1167,88 @@ erDiagram
     medicamento ||--|{ tratamiento : usa
     inventario ||--|| hospital : pertenece
     inventario ||--|| medicamento : contiene
+```
+## Control de acceso y roles de datos 
+
+**Gerente general:** 
+acceso total (administrador global)
+```
+db.createUser({
+    user: "directorGeneral",
+    pwd: "directorGeneral123",
+    roles: [
+        { role: "root", db: "admin" }
+    ]
+});
+```
+
+**Medico especialsita:** 
+acceso clínico completo, lectura de catálogos
+
+```
+db.createUser({
+    user: "medicoEspecialista",
+    pwd: "medicoEspecialista123",
+    roles: [
+        { role: "readWrite", db: "Sistema_Hospitalario", collection: "paciente" },
+        { role: "readWrite", db: "Sistema_Hospitalario", collection: "historial_clinico" },
+        { role: "readWrite", db: "Sistema_Hospitalario", collection: "visita_medica" },
+        { role: "readWrite", db: "Sistema_Hospitalario", collection: "tratamiento" },
+        { role: "readWrite", db: "Sistema_Hospitalario", collection: "diagnostico" },
+        { role: "read", db: "Sistema_Hospitalario", collection: "medico" },
+        { role: "read", db: "Sistema_Hospitalario", collection: "enfermero" },
+        { role: "read", db: "Sistema_Hospitalario", collection: "seguros_medicos" },
+        { role: "read", db: "Sistema_Hospitalario", collection: "medicamento" },
+        { role: "read", db: "Sistema_Hospitalario", collection: "inventario" },
+        { role: "read", db: "Sistema_Hospitalario", collection: "area" },
+        { role: "read", db: "Sistema_Hospitalario", collection: "hospitales" }
+    ]
+});
+```
+**Enfermero:** 
+Acceso solo a información asignada y registros de atención
+```
+db.createUser({
+    user: "enfermero",
+    pwd: "enfermero123",
+    roles: [
+        { role: "read", db: "Sistema_Hospitalario", collection: "paciente" },
+        { role: "readWrite", db: "Sistema_Hospitalario", collection: "visita_medica" },
+        { role: "read", db: "Sistema_Hospitalario", collection: "historial_clinico" },
+        { role: "read", db: "Sistema_Hospitalario", collection: "tratamiento" },
+        { role: "read", db: "Sistema_Hospitalario", collection: "medico" },
+        { role: "read", db: "Sistema_Hospitalario", collection: "enfermero" }
+    ]
+});
+```
+
+**Personal administrativo:** 
+control de inventarios, áreas y personal
+```
+db.createUser({
+    user: "personalAdministrativo",
+    pwd: "personalAdministrativo123",
+    roles: [
+        { role: "readWrite", db: "Sistema_Hospitalario", collection: "inventario" },
+        { role: "readWrite", db: "Sistema_Hospitalario", collection: "personal" },
+        { role: "readWrite", db: "Sistema_Hospitalario", collection: "personal_administrativo" },
+        { role: "readWrite", db: "Sistema_Hospitalario", collection: "hospitales" },
+        { role: "read", db: "Sistema_Hospitalario", collection: "area" },
+        { role: "read", db: "Sistema_Hospitalario", collection: "medicamento" }
+    ]
+});
+```
+
+**Personal mantenimiento:** 
+```
+acceso exclusivo a mantenimiento e infraestructura
+db.createUser({
+    user: "personalMantenimiento",
+    pwd: "personalMantenimiento123",
+    roles: [
+        { role: "readWrite", db: "Sistema_Hospitalario", collection: "personal_mantenimiento" },
+        { role: "read", db: "Sistema_Hospitalario", collection: "hospitales" },
+        { role: "read", db: "Sistema_Hospitalario", collection: "area" }
+    ]
+});
 ```
