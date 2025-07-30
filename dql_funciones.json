@@ -1,0 +1,139 @@
+// 1. Obtener hospitales que tienen más de una especialidad
+function obtenerHospitalesConMultiplesEspecialidades() {
+  return db.hospitales.find({ $expr: { $gt: [ { $size: "$areas_especializadas" }, 1 ] } }).toArray();
+}
+
+// 2. Listar hospitales que tienen 'Pediatría' o 'Cardiología'
+function listarHospitalesPorEspecialidad(especialidad1, especialidad2) {
+  return db.hospitales.find({ areas_especializadas: { $in: [especialidad1, especialidad2] } }).toArray();
+}
+
+// 3. Proyección de hospital: obtener solo nombre y ciudad
+function proyectarNombreCiudadHospital() {
+  return db.hospitales.find({}, { nombre: 1, ciudad: 1, _id: 0 }).toArray();
+}
+
+// 4. Agrupar hospitales por ciudad y listar nombres de hospitales en cada ciudad
+function agruparHospitalesPorCiudad() {
+  return db.hospitales.aggregate([ { $group: { _id: "$ciudad", hospitales: { $push: "$nombre" } } } ]).toArray();
+}
+
+// 5. Obtener pacientes mayores o iguales a una edad dada
+function obtenerPacientesMayoresDe(edad) {
+  return db.paciente.find({ edad: { $gte: edad } }).toArray();
+}
+
+// 6. Agrupar pacientes por género y contar total de cada uno
+function agruparPacientesPorGenero() {
+  return db.paciente.aggregate([
+    {
+      $lookup: {
+        from: "genero",
+        localField: "id_genero",
+        foreignField: "id_genero",
+        as: "genero_info"
+      }
+    },
+    { $unwind: "$genero_info" },
+    {
+      $group: {
+        _id: "$genero_info.descripcion",
+        total: { $sum: 1 }
+      }
+    }
+  ]).toArray();
+}
+
+// 7. Buscar pacientes cuyos nombres terminan con un caracter específico
+function obtenerPacientesNombreTerminaEn(caracter) {
+  return db.paciente.find({ nombre: { $regex: new RegExp(`\\b\\w*${caracter}\\b`, 'i') } }).toArray();
+}
+
+// 8. Obtener pacientes con edad menor a un valor dado
+function obtenerPacientesMenoresDe(edad) {
+  return db.paciente.find({ edad: { $lt: edad } }).toArray();
+}
+
+// 9. Listar empleados con nombre, rol y el nombre de su hospital
+function listarEmpleadosConInfoHospital() {
+  return db.empleado.aggregate([
+    {
+      $lookup: {
+        from: "hospitales",
+        localField: "id_hospital",
+        foreignField: "id_hospital",
+        as: "hospital_info"
+      }
+    },
+    { $unwind: "$hospital_info" },
+    {
+      $project: {
+        nombre: 1,
+        id_rol: 1,
+        hospital: "$hospital_info.nombre"
+      }
+    }
+  ]).toArray();
+}
+
+// 10. Agrupar empleados por rol y contar cuántos hay de cada tipo
+function agruparEmpleadosPorRol() {
+  return db.empleado.aggregate([
+    {
+      $group: {
+        _id: "$id_rol",
+        total: { $sum: 1 }
+      }
+    }
+  ]).toArray();
+}
+
+// 11. Agrupar medicamentos por tipo y contar cuántos hay de cada tipo
+function agruparMedicamentosPorTipo() {
+  return db.medicamento.aggregate([ { $group: { _id: "$tipo", total: { $sum: 1 } } } ]).toArray();
+}
+
+// 12. Buscar medicamentos cuyo nombre contenga una cadena de texto
+function buscarMedicamentosPorNombreContiene(texto) {
+  return db.medicamento.find({ nombre: { $regex: new RegExp(texto, 'i') } }).toArray();
+}
+
+// 13. Mostrar solo el nombre y tipo de todos los medicamentos
+function proyectarNombreTipoMedicamento() {
+  return db.medicamento.find({}, { nombre: 1, tipo: 1, _id: 0 }).toArray();
+}
+
+// 14. Agrupar pacientes por diagnóstico y contar total de cada diagnóstico
+function agruparPacientesPorDiagnostico() {
+  return db.historial_clinico.aggregate([ { $group: { _id: "$diagnostico", total: { $sum: 1 } } } ]).toArray();
+}
+
+// 15. Buscar historias clínicas con un diagnóstico específico
+function buscarHistorialClinicoPorDiagnostico(diagnostico) {
+  return db.historial_clinico.find({ diagnostico: diagnostico }).toArray();
+}
+
+// 16. Obtener diagnósticos frecuentes ordenados de mayor a menor cantidad
+function obtenerDiagnosticosFrecuentes() {
+  return db.historial_clinico.aggregate([ { $group: { _id: "$diagnostico", total: { $sum: 1 } } }, { $sort: { total: -1 } } ]).toArray();
+}
+
+// 17. Contar el número de visitas médicas realizadas por cada médico
+function contarVisitasMedicasPorMedico() {
+  return db.visita_medica.aggregate([ { $group: { _id: "$id_medico", total_visitas: { $sum: 1 } } } ]).toArray();
+}
+
+// 18. Listar todas las visitas médicas ordenadas por fecha de forma descendente
+function obtenerVisitasMedicasOrdenadasPorFechaDesc() {
+  return db.visita_medica.find({}).sort({ fecha: -1 }).toArray();
+}
+
+// 19. Agrupar visitas médicas por hospital y contar total de visitas en cada uno
+function agruparVisitasPorHospital() {
+  return db.visita_medica.aggregate([ { $group: { _id: "$id_hospital", visitas: { $sum: 1 } } } ]).toArray();
+}
+
+// 20. Buscar hospitales cuyo nombre contenga una cadena parcial (case insensitive)
+function buscarHospitalesPorNombreParcial(nombreParcial) {
+  return db.hospitales.find({ nombre: { $regex: new RegExp(nombreParcial, 'i') } }).toArray();
+}

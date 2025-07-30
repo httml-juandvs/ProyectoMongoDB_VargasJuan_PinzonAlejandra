@@ -1,0 +1,821 @@
+// 1. Obtener hospitales que tienen más de una especialidad
+db.hospitales.find({ $expr: { $gt: [ { $size: "$areas_especializadas" }, 1 ] } });
+
+// 2. Listar hospitales que tienen 'Pediatría' o 'Cardiología'
+db.hospitales.find({ areas_especializadas: { $in: ["Pediatría", "Cardiología"] } });
+
+// 3. Proyección de hospital: nombre y ciudad
+db.hospitales.find({}, { nombre: 1, ciudad: 1, _id: 0 });
+
+// 4. Agrupar hospitales por ciudad y listar nombres
+db.hospitales.aggregate([ { $group: { _id: "$ciudad", hospitales: { $push: "$nombre" } } } ]);
+
+// 5. Pacientes mayores de 60 años
+db.paciente.find({ edad: { $gte: 60 } });
+
+// 6. Agrupar pacientes por género
+db.paciente.aggregate([
+  {
+    $lookup: {
+      from: "genero",
+      localField: "id_genero",
+      foreignField: "id_genero",
+      as: "genero_info"
+    }
+  },
+  { $unwind: "$genero_info" },
+  {
+    $group: {
+      _id: "$genero_info.descripcion",
+      total: { $sum: 1 }
+    }
+  }
+]);
+
+// 7. Buscar pacientes cuyos nombres terminan en 'a'
+db.paciente.find({ nombre: { $regex: /\b\w*a\b/i } });
+
+// 8. Pacientes con edad menor de 10 años
+db.paciente.find({ edad: { $lt: 10 } });
+
+// 9. Listar empleados con nombre, rol y hospital
+db.empleado.aggregate([
+  {
+    $lookup: {
+      from: "hospitales",
+      localField: "id_hospital",
+      foreignField: "id_hospital",
+      as: "hospital_info"
+    }
+  },
+  { $unwind: "$hospital_info" },
+  {
+    $project: {
+      nombre: 1,
+      id_rol: 1,
+      hospital: "$hospital_info.nombre"
+    }
+  }
+]);
+
+// 10. Empleados agrupados por rol
+db.empleado.aggregate([
+  {
+    $group: {
+      _id: "$id_rol",
+      total: { $sum: 1 }
+    }
+  }
+]);
+
+
+// 11. Agrupar medicamentos por tipo y contar cuántos hay de cada uno
+
+db.medicamento.aggregate([ { $group: { _id: "$tipo", total: { $sum: 1 } } } ]);
+
+// 12. Buscar medicamentos cuyo nombre contenga 'ina'
+
+db.medicamento.find({ nombre: { $regex: /ina/i } });
+
+// 13. Mostrar solo nombre y tipo de los medicamentos
+
+db.medicamento.find({}, { nombre: 1, tipo: 1, _id: 0 });
+
+// 14. Pacientes agrupados por diagnóstico
+
+db.historial_clinico.aggregate([ { $group: { _id: "$diagnostico", total: { $sum: 1 } } } ]);
+
+// 15. Buscar historias clínicas con diagnóstico 'Diabetes'
+
+db.historial_clinico.find({ diagnostico: "Diabetes" });
+
+// 16. Diagnósticos frecuentes ordenados descendente
+
+db.historial_clinico.aggregate([ { $group: { _id: "$diagnostico", total: { $sum: 1 } } }, { $sort: { total: -1 } } ]);
+
+// 17. Contar visitas médicas por médico
+
+db.visita_medica.aggregate([ { $group: { _id: "$id_medico", total_visitas: { $sum: 1 } } } ]);
+
+// 18. Visitas médicas ordenadas por fecha descendente
+
+db.visita_medica.find({}).sort({ fecha: -1 });
+
+// 19. Agrupar visitas por hospital
+
+db.visita_medica.aggregate([ { $group: { _id: "$id_hospital", visitas: { $sum: 1 } } } ]);
+
+// 20. Consulta original sobre personal_administrativo
+db.personal_administrativo.aggregate([{ $sample: { size: 1 } }]);
+
+// 21. Consulta original sobre genero
+db.genero.aggregate([{ $sample: { size: 1 } }]);
+
+// 22. Consulta original sobre rango_edad
+db.rango_edad.aggregate([{ $sample: { size: 1 } }]);
+
+// 23. Consulta original sobre empleado
+db.empleado.aggregate([{ $sample: { size: 1 } }]);
+
+// 24. Consulta original sobre area
+db.area.aggregate([{ $sample: { size: 1 } }]);
+
+// 25. Consulta original sobre tratamiento
+db.tratamiento.aggregate([{ $sample: { size: 1 } }]);
+
+// 26. Consulta original sobre personal_mantenimiento
+db.personal_mantenimiento.aggregate([{ $sample: { size: 1 } }]);
+
+// 27. Consulta original sobre personal_administrativo
+db.personal_administrativo.aggregate([{ $sample: { size: 1 } }]);
+
+// 28. Buscar hospitales por nombre parcial (ej. "General")
+db.hospitales.find({ nombre: { $regex: /General/i } });
+
+// 29. Listar médicos y su área (nombre del área)
+db.medico.aggregate([
+  {
+    $lookup: {
+      from: "area",
+      localField: "id_area",
+      foreignField: "id_area",
+      as: "area_info"
+    }
+  },
+  { $unwind: "$area_info" },
+  {
+    $project: {
+      nombre: 1,
+      especialidad: 1,
+      area: "$area_info.nombre"
+    }
+  }
+]);
+
+// 28. Top 5 diagnósticos más frecuentes
+db.historial_clinico.aggregate([
+  { $group: { _id: "$diagnostico", total: { $sum: 1 } } },
+  { $sort: { total: -1 } },
+  { $limit: 5 }
+]);
+
+// 29. Buscar pacientes con teléfono en Bogotá (códigos comunes: 1, 601, 571)
+db.paciente.find({ telefono: { $regex: /^(5|2|1)/ } });
+
+// 30. Listar empleados con el mismo correo en más de un hospital
+db.empleado.aggregate([
+  { $group: { _id: "$correo", hospitales: { $addToSet: "$id_hospital" }, count: { $sum: 1 } } },
+  { $match: { count: { $gt: 1 } } }
+]);
+
+// 31. Buscar medicamentos con disponibilidad (al menos una unidad)
+db.inventario.aggregate([
+  {
+    $addFields: {
+      disponibilidad_num: { $toInt: "$disponibilidad" }
+    }
+  },
+  {
+    $match: {
+      disponibilidad_num: { $gt: 0 }
+    }
+  },
+  {
+    $lookup: {
+      from: "medicamento",
+      localField: "id_medicamento",
+      foreignField: "id_medicamento",
+      as: "medicamento_info"
+    }
+  },
+  { $unwind: "$medicamento_info" },
+  {
+    $lookup: {
+      from: "hospitales",
+      localField: "id_hospital",
+      foreignField: "id_hospital",
+      as: "hospital_info"
+    }
+  },
+  { $unwind: "$hospital_info" },
+  {
+    $project: {
+      _id: 0,
+      hospital: "$hospital_info.nombre",
+      nombre_medicamento: "$medicamento_info.nombre",
+      tipo: "$medicamento_info.tipo",
+      fabricante: "$medicamento_info.fabricante",
+      disponibilidad: "$disponibilidad_num"
+    }
+  }
+]);
+
+// 32. Listar pacientes y su hospital (nombre)
+db.paciente.aggregate([
+  { $lookup: {
+      from: "hospitales",
+      localField: "id_hospital",
+      foreignField: "id_hospital",
+      as: "hospital"
+  } },
+  { $unwind: "$hospital" },
+  { $project: { nombre: 1, hospital: "$hospital.nombre" } }
+]);
+
+// 33. Total de empleados por hospital
+
+db.empleado.aggregate([
+  { $group: { _id: "$id_hospital", total_empleados: { $sum: 1 } } },
+  { $sort: { total_empleados: -1 } }
+]);
+
+
+// 34. Buscar pacientes cuyo nombre contiene 'Juan'
+db.paciente.find({ nombre: { $regex: /Juan/i } });
+
+
+// 35. Buscar pacientes cuyo nombre contiene 'Maria'
+db.paciente.find({ nombre: { $regex: /Maria/i } });
+
+
+// 36. Buscar pacientes cuyo nombre contiene 'Pedro'
+db.paciente.find({ nombre: { $regex: /Pedro/i } });
+
+
+// 37. Buscar pacientes cuyo nombre contiene 'Julian'
+db.paciente.find({ nombre: { $regex: /Julian/i } });
+
+
+// 38. Buscar pacientes cuyo nombre contiene 'Andres'
+db.paciente.find({ nombre: { $regex: /Andres/i } });
+
+
+// 39. Listar todos los medicamentos con sus campos básicos
+db.medicamento.find({}, { _id: 0 }).toArray();
+
+// 40. Buscar medicamentos cuyo nombre contiene 'ina'
+db.medicamento.find({ nombre: { $regex: /ina$/i } }, { _id: 0, nombre: 1, tipo: 1 });
+
+// 41. Contar medicamentos por tipo
+db.medicamento.aggregate([
+  { $group: { _id: "$tipo", total: { $sum: 1 } } }
+]);
+
+// 42. Listar medicamentos y su disponibilidad total en todos los hospitales
+db.inventario.aggregate([
+  {
+    $group: {
+      _id: "$id_medicamento",
+      total_disponibilidad: { $sum: { $toInt: "$disponibilidad" } }
+    }
+  },
+  {
+    $lookup: {
+      from: "medicamento",
+      localField: "_id",
+      foreignField: "id_medicamento",
+      as: "medicamento_info"
+    }
+  },
+  { $unwind: "$medicamento_info" },
+  {
+    $project: {
+      _id: 0,
+      id_medicamento: "$_id",
+      nombre: "$medicamento_info.nombre",
+      tipo: "$medicamento_info.tipo",
+      fabricante: "$medicamento_info.fabricante",
+      total_disponibilidad: 1
+    }
+  }
+]);
+
+// 43. Conteo de medicamentos por fabricante
+db.medicamento.aggregate([
+  { $group: { _id: "$fabricante", total: { $sum: 1 } } }
+]);
+
+// 44. Buscar medicamentos tipo "Jarabe"
+db.medicamento.find({ tipo: "Jarabe" }, { _id: 0, nombre: 1, fabricante: 1 });
+
+// 45. Buscar medicamentos tipo "Cápsula"
+db.medicamento.find({ tipo: "Cápsula" }, { _id: 0, nombre: 1, fabricante: 1 });
+
+// 46. Agrupar inventario por hospital y contar total de medicamentos con stock positivo
+db.inventario.aggregate([
+  {
+    $addFields: {
+      disponibilidad_num: { $toInt: "$disponibilidad" }
+    }
+  },
+  { $match: { disponibilidad_num: { $gt: 0 } } },
+  {
+    $group: {
+      _id: "$id_hospital",
+      total_medicamentos: { $sum: 1 }
+    }
+  }
+]);
+
+// 47. Medicamentos con nombre que termina en "il"
+db.medicamento.find({ nombre: { $regex: /il$/i } }, { _id: 0, nombre: 1, tipo: 1 });
+
+// 48. Medicamentos con nombre que termina en "il"
+db.medicamento.find({ nombre: { $regex: /ona$/i } }, { _id: 0, nombre: 1, tipo: 1 });
+
+// 49. Mostrar nombre y tipo de medicamento ordenado alfabéticamente
+db.medicamento.find({}, { _id: 0, nombre: 1, tipo: 1 }).sort({ nombre: 1 });
+
+// 50. Top 5 medicamentos más costosos 
+db.medicamento.aggregate([
+  {
+    $addFields: { precio: { $multiply: [ { $toInt: "$id_medicamento" }, 10 ] } } 
+  },
+  { $sort: { precio: -1 } },
+  { $limit: 5 },
+  {
+    $project: {
+      _id: 0,
+      nombre: 1,
+      precio: 1
+    }
+  }
+]);
+
+// 51. Medicamentos que contienen 'fen' en el nombre
+db.medicamento.find({ nombre: { $regex: /fen/i } }, { _id: 0, nombre: 1 });
+
+// 52. Inventario total de medicamentos por fabricante
+db.inventario.aggregate([
+  {
+    $lookup: {
+      from: "medicamento",
+      localField: "id_medicamento",
+      foreignField: "id_medicamento",
+      as: "medicamento_info"
+    }
+  },
+  { $unwind: "$medicamento_info" },
+  {
+    $group: {
+      _id: "$medicamento_info.fabricante",
+      total_disponibilidad: { $sum: { $toInt: "$disponibilidad" } }
+    }
+  }
+]);
+
+// 53. Medicamentos con disponibilidad exacta de 0 unidades
+db.inventario.aggregate([
+  {
+    $addFields: {
+      disponibilidad_num: { $toInt: "$disponibilidad" }
+    }
+  },
+  { $match: { disponibilidad_num: 0 } },
+  {
+    $lookup: {
+      from: "medicamento",
+      localField: "id_medicamento",
+      foreignField: "id_medicamento",
+      as: "medicamento_info"
+    }
+  },
+  { $unwind: "$medicamento_info" },
+  {
+    $project: {
+      _id: 0,
+      nombre_medicamento: "$medicamento_info.nombre"
+    }
+  }
+]);
+
+// 54. Listar medicamentos y la cantidad total disponible agrupada por tipo
+db.inventario.aggregate([
+  {
+    $lookup: {
+      from: "medicamento",
+      localField: "id_medicamento",
+      foreignField: "id_medicamento",
+      as: "medicamento_info"
+    }
+  },
+  { $unwind: "$medicamento_info" },
+  {
+    $group: {
+      _id: "$medicamento_info.tipo",
+      total_disponibilidad: { $sum: { $toInt: "$disponibilidad" } }
+    }
+  }
+]);
+
+// 55. Listar todos los médicos con sus campos básicos
+db.medico.find({}, { _id: 0 }).toArray();
+
+// 56. Buscar médicos cuyo nombre contiene 'Juan'
+db.medico.find({ nombre: { $regex: /Juan/i } }, { _id: 0, nombre: 1, especialidad: 1 });
+
+// 57. Contar médicos por especialidad
+db.medico.aggregate([
+  { $group: { _id: "$especialidad", total: { $sum: 1 } } }
+]);
+
+// 58. Médicos y su área (nombre del área)
+db.medico.aggregate([
+  {
+    $lookup: {
+      from: "area",
+      localField: "id_area",
+      foreignField: "id_area",
+      as: "area_info"
+    }
+  },
+  { $unwind: "$area_info" },
+  {
+    $project: {
+      nombre: 1,
+      especialidad: 1,
+      area: "$area_info.nombre"
+    }
+  }
+]);
+
+// 59. Médicos ordenados por salario descendente
+db.medico.find({}, { _id: 0, nombre: 1, salario: 1 }).sort({ salario: -1 });
+
+// 60. Médicos con número de colegiatura que contenga '123'
+db.medico.find({ numero_colegiatura: { $regex: /123/ } }, { _id: 0, nombre: 1, numero_colegiatura: 1 });
+
+// 61. Médicos con nombre que empieza con 'Dr.'
+db.medico.find({ nombre: { $regex: /^Dr\./ } }, { _id: 0, nombre: 1 });
+
+// 62. Top 5 especialidades con más médicos
+db.medico.aggregate([
+  { $group: { _id: "$especialidad", total: { $sum: 1 } } },
+  { $sort: { total: -1 } },
+  { $limit: 5 }
+]);
+
+// 63. Buscar médicos que tienen en su correo 'hospital'
+db.medico.find({ correo: { $regex: /hospital/i } }, { _id: 0, nombre: 1, correo: 1 });
+
+// 64. Médicos con la especialidad que contenga 'Cardio'
+db.medico.find({ especialidad: { $regex: /Cardio/i } }, { _id: 0, nombre: 1 });
+
+// 65. Listar todos los enfermeros con sus campos básicos
+db.enfermero.find({}, { _id: 0 }).toArray();
+
+// 66. Buscar enfermeros cuyo nombre contiene 'Ana'
+db.enfermero.find({ nombre: { $regex: /Ana/i } }, { _id: 0, nombre: 1, salario: 1 });
+
+// 67. Contar enfermeros por área
+db.enfermero.aggregate([
+  { $group: { _id: "$id_area", total: { $sum: 1 } } }
+]);
+
+// 68. Enfermeros y su área (nombre del área)
+db.enfermero.aggregate([
+  {
+    $lookup: {
+      from: "area",
+      localField: "id_area",
+      foreignField: "id_area",
+      as: "area_info"
+    }
+  },
+  { $unwind: "$area_info" },
+  {
+    $project: {
+      nombre: 1,
+      telefono: 1,
+      salario: 1,
+      area: "$area_info.nombre"
+    }
+  }
+]);
+
+
+// 69. Enfermeros ordenados por salario descendente
+db.enfermero.find({}, { _id: 0, nombre: 1, salario: 1 }).sort({ salario: -1 });
+
+// 70. Enfermeros cuyo correo contiene 'hospital'
+db.enfermero.find({ correo: { $regex: /hospital/i } }, { _id: 0, nombre: 1, correo: 1 });
+
+// 71. Enfermeros con nombre que empieza con 'Maria'
+db.enfermero.find({ nombre: { $regex: /^Maria/i } }, { _id: 0, nombre: 1 });
+
+// 72. Top 3 áreas con más enfermeros
+db.enfermero.aggregate([
+  { $group: { _id: "$id_area", total: { $sum: 1 } } },
+  { $sort: { total: -1 } },
+  { $limit: 3 }
+]);
+
+// 73. Buscar enfermeros con teléfono que contiene '5'
+db.enfermero.find({ telefono: { $regex: /5/ } }, { _id: 0, nombre: 1, telefono: 1 });
+
+// 74. Enfermeros que trabajan en un área específica (por id_area)
+db.enfermero.find({ id_area: 5 }, { _id: 0, nombre: 1, salario: 1 });
+
+// 75. Enfermeros cuyo nombre contiene 'Luis'
+db.enfermero.find({ nombre: { $regex: /Luis/i } }, { _id: 0, nombre: 1 });
+
+// 76. Listar todos los hospitales con su gerente
+db.hospitales.aggregate([
+  {
+    $lookup: {
+      from: "gerente",
+      localField: "id_gerente",
+      foreignField: "id_gerente",
+      as: "gerente_info"
+    }
+  },
+  { $unwind: "$gerente_info" },
+  { $project: { nombre: 1, ciudad: 1, gerente: "$gerente_info.nombre" } }
+]);
+
+// 76. Personal administrativo en áreas de pediatría
+db.personal_administrativo.aggregate([
+  {
+    $lookup: {
+      from: "area",
+      localField: "id_area",
+      foreignField: "id_area",
+      as: "area_info"
+    }
+  },
+  { $unwind: "$area_info" },
+  { $match: { "area_info.nombre": { $regex: /Pediatría/i } } },
+  { $project: { nombre: 1, telefono: 1 } }
+]);
+
+
+// 77. Inventario con medicamentos de fabricante 'Bayer' y disponibilidad > 10
+db.inventario.aggregate([
+  {
+    $lookup: {
+      from: "medicamento",
+      localField: "id_medicamento",
+      foreignField: "id_medicamento",
+      as: "medicamento_info"
+    }
+  },
+  { $unwind: "$medicamento_info" },
+  {
+    $match: {
+      "medicamento_info.fabricante": "Bayer",
+      disponibilidad: { $gt: "10" }
+    }
+  },
+  { $project: { id_hospital: 1, disponibilidad: 1 } }
+]);
+
+// 79. Listar tratamientos que aplican en área de neurología
+db.tratamiento.aggregate([
+  {
+    $lookup: {
+      from: "area",
+      localField: "id_area",
+      foreignField: "id_area",
+      as: "area_info"
+    }
+  },
+  { $unwind: "$area_info" },
+  { $match: { "area_info.nombre": { $regex: /Neurología/i } } },
+  { $project: { nombre: 1, descripcion: 1 } }
+]);
+
+// 80. Médicos cuyo correo contiene 'gmail.com' ordenados por especialidad
+db.medico.find({ correo: { $regex: /gmail\.com/i } }).sort({ especialidad: 1 });
+
+// 81. Empleados con rol 'personal_mantenimiento' y teléfonos que empiezan con '57'
+db.personal_mantenimiento.find({ telefono: { $regex: /^57/ } });
+
+// 82. Personal administrativo que trabajan en área de urgencias
+db.personal_administrativo.aggregate([
+  {
+    $lookup: {
+      from: "area",
+      localField: "id_area",
+      foreignField: "id_area",
+      as: "area_info"
+    }
+  },
+  { $unwind: "$area_info" },
+  { $match: { "area_info.nombre": { $regex: /Urgencias/i } } },
+  { $project: { nombre: 1, telefono: 1 } }
+]);
+
+// 83. Pacientes que tengan historial con diagnóstico 'asma'
+db.historial_clinico.find({ diagnostico: /asma/i });
+
+// 84. Listar todos los roles y número de empleados por rol
+db.empleado.aggregate([
+  {
+    $group: {
+      _id: "$id_rol",
+      total_empleados: { $sum: 1 }
+    }
+  }
+]);
+
+// 85. Médicos con especialidad que contenga 'Pediatría'
+db.medico.find({ especialidad: { $regex: /Pediatría/i } }, { _id: 0, nombre: 1, especialidad: 1 });
+
+// 86. Médicos con especialidad que contenga 'Nefrología'
+ db.medico.find({ especialidad: { $regex: /Nefrología/i } }, { _id: 0, nombre: 1, especialidad: 1 });
+
+ // 87. Médicos con especialidad que contenga 'Dernatología'
+ db.medico.find({ especialidad: { $regex: /Dernatología/i } }, { _id: 0, nombre: 1, especialidad: 1 });
+
+ // 88. Listar personal mantenimiento y su hospital
+db.personal_mantenimiento.aggregate([
+  {
+    $lookup: {
+      from: "hospitales",
+      localField: "id_hospital",
+      foreignField: "id_hospital",
+      as: "hospital_info"
+    }
+  },
+  { $unwind: "$hospital_info" },
+  {
+    $project: {
+      nombre: 1,
+      tipo_servicio: 1,
+      hospital: "$hospital_info.nombre"
+    }
+  }
+]);
+
+// 89. Pacientes atendidos en hospitales de Bogotá
+db.paciente.aggregate([
+  {
+    $lookup: {
+      from: "hospitales",
+      localField: "id_hospital",
+      foreignField: "id_hospital",
+      as: "hospital_info"
+    }
+  },
+  { $unwind: "$hospital_info" },
+  { $match: { "hospital_info.ciudad": "Bogotá" } },
+  { $project: { nombre: 1, direccion: 1, hospital: "$hospital_info.nombre" } }
+]);
+
+// 90. Pacientes atendidos en hospitales de Medellín
+db.paciente.aggregate([
+  {
+    $lookup: {
+      from: "hospitales",
+      localField: "id_hospital",
+      foreignField: "id_hospital",
+      as: "hospital_info"
+    }
+  },
+  { $unwind: "$hospital_info" },
+  { $match: { "hospital_info.ciudad": "Medellín" } },
+  { $project: { nombre: 1, direccion: 1, hospital: "$hospital_info.nombre" } }
+]);
+
+// 90. Pacientes atendidos en hospitales de Cali
+db.paciente.aggregate([
+  {
+    $lookup: {
+      from: "hospitales",
+      localField: "id_hospital",
+      foreignField: "id_hospital",
+      as: "hospital_info"
+    }
+  },
+  { $unwind: "$hospital_info" },
+  { $match: { "hospital_info.ciudad": "Cali" } },
+  { $project: { nombre: 1, direccion: 1, hospital: "$hospital_info.nombre" } }
+]);
+
+// 91. Inventario total agrupado por tipo de medicamento Inyectable
+db.inventario.aggregate([
+  {
+    $lookup: {
+      from: "medicamento",
+      localField: "id_medicamento",
+      foreignField: "id_medicamento",
+      as: "medicamento_info"
+    }
+  },
+  { $unwind: "$medicamento_info" },
+  {
+    $group: {
+      _id: "$medicamento_info.tipo",
+      total_disponibilidad: { $sum: { $toInt: "$disponibilidad" } }
+    }
+  },
+  { $match: { _id: "Inyectable" } }
+]);
+
+// 92. Inventario total agrupado por tipo de medicamento Jarabe
+db.inventario.aggregate([
+  {
+    $lookup: {
+      from: "medicamento",
+      localField: "id_medicamento",
+      foreignField: "id_medicamento",
+      as: "medicamento_info"
+    }
+  },
+  { $unwind: "$medicamento_info" },
+  {
+    $group: {
+      _id: "$medicamento_info.tipo",
+      total_disponibilidad: { $sum: { $toInt: "$disponibilidad" } }
+    }
+  },
+  { $match: { _id: "Jarabe" } }
+]);
+
+// 93. Médicos que no tienen visitas médicas registradas
+db.medico.aggregate([
+  {
+    $lookup: {
+      from: "visita_medica",
+      localField: "id",
+      foreignField: "id_medico",
+      as: "visitas"
+    }
+  },
+  { $match: { visitas: { $size: 0 } } },
+  { $project: { nombre: 1, especialidad: 1 } }
+]);
+
+// 94. Número total de visitas médicas por año
+db.visita_medica.aggregate([
+  {
+    $addFields: {
+      anio: { $year: { $dateFromString: { dateString: "$fecha" } } }
+    }
+  },
+  {
+    $group: {
+      _id: "$anio",
+      total_visitas: { $sum: 1 }
+    }
+  },
+  { $sort: { _id: 1 } }
+]);
+
+// 95. Listar personal de mantenimiento y el tipo de servicio que prestan
+db.personal_mantenimiento.find({}, { nombre: 1, tipo_servicio: 1, _id: 0 });
+
+¿// 96. Médicos que trabajan en áreas con nombre que contenga 'Cirugía'
+db.medico.aggregate([
+  {
+    $lookup: {
+      from: "area",
+      localField: "id_area",
+      foreignField: "id_area",
+      as: "area_info"
+    }
+  },
+  { $unwind: "$area_info" },
+  { $match: { "area_info.nombre": { $regex: /Cirugía/i } } },
+  { $project: { nombre: 1, especialidad: 1, area: "$area_info.nombre" } }
+]);
+
+
+// 97. Personal administrativo con teléfono que empieza con código nacional '57'
+db.personal_administrativo.find({ telefono: { $regex: /^57/ } }, { nombre: 1, telefono: 1 });
+
+// 98. Médicos cuyo nombre termina con 'ez' (apellido típico)
+db.medico.find({ nombre: { $regex: /ez$/i } }, { nombre: 1 });
+
+// 98. Listar tratamientos que aplican en área de neurología
+db.tratamiento.aggregate([
+  {
+    $lookup: {
+      from: "area",
+      localField: "id_area",
+      foreignField: "id_area",
+      as: "area_info"
+    }
+  },
+  { $unwind: "$area_info" },
+  { $match: { "area_info.nombre": { $regex: /Neurología/i } } },
+  { $project: { nombre: 1, descripcion: 1 } }
+]);
+
+// 99. Listar tratamientos que aplican en área de Ginecología
+db.tratamiento.aggregate([
+  {
+    $lookup: {
+      from: "area",
+      localField: "id_area",
+      foreignField: "id_area",
+      as: "area_info"
+    }
+  },
+  { $unwind: "$area_info" },
+  { $match: { "area_info.nombre": { $regex: /Ginecología/i } } },
+  { $project: { nombre: 1, descripcion: 1 } }
+]);
+
+// 100. Buscar medicamentos tipo "Tableta"
+db.medicamento.find({ tipo: "Tableta" }, { _id: 0, nombre: 1, fabricante: 1 });
