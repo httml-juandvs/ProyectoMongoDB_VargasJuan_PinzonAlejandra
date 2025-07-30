@@ -69,13 +69,28 @@
 
 ---
 
-## Tabla de Contenido
+## Tabla de Contenidos
 
 - [Introducción](#introducción)  
 - [Caso de Estudio](#caso-de-estudio)   
 - [Instalación General](#instalación-general)  
 - [Planificación](#planificación)  
-- [Ejecución](#ejecución)   
+- [Modelo Conceptual](#Construcción-del-Modelo-Conceptual)
+- [Construcción del Modelo Lógico](#construcción-del-modelo-lógico)
+- [Normalización del Modelo Lógico](#normalización-del-modelo-lógico)
+- [Modelo Entidad-Relación (ER)](#modelo-entidad-relación-er)
+- [Descripción de Entidades y Relaciones](#descripción-de-entidades-y-relaciones)
+- [Estructura del Repositorio](#estructura-del-repositorio)
+- [Requisitos del Sistema](#requisitos-del-sistema)
+- [Instalación y Configuración](#instalación-y-configuración)
+- [Carga de Datos y Scripts](#carga-de-datos-y-scripts)
+- [Ejemplos de Consultas MongoDB](#ejemplos-de-consultas-mongodb)
+- [Funciones JavaScript (UDF)](#funciones-javascript-udf)
+- [Control de Acceso y Roles de Usuario](#control-de-acceso-y-roles-de-usuario)
+- [Gestión de Permisos y Seguridad](#gestión-de-permisos-y-seguridad)
+- [Estructura de Carpetas y Archivos](#estructura-de-carpetas-y-archivos)
+- [Contribuciones](#contribuciones)
+- [Licencia y Contacto](#licencia-y-contacto)   
 
 ---
 
@@ -164,7 +179,7 @@ Los archivos relacionados con la BBDD del Sistema Hospitalario, se encuentran en
 
 Una vez analizados los requerimientos establecidos para el desarrollo de un sistema hospitalario eficiente, se dio inicio al proceso de diseño del modelo de base de datos en MongoDB. Este análisis incluyó tanto los lineamientos académicos como las prácticas recomendadas por entidades del sector salud, tales como el Ministerio de Salud de Colombia, para garantizar la integridad, trazabilidad y escalabilidad de la información clínica y administrativa.
 
-**Construcción del Modelo Conceptual**
+##**Construcción del Modelo Conceptual**
 
 Se diseñó el modelo conceptual identificando cada una de las entidades, sus atributos y las relaciones entre ellas. Este modelo conceptual proporciona una visión clara y estructurada de cómo se organizarán y conectarán los diferentes elementos de la base de datos.
 
@@ -595,13 +610,13 @@ Descripción
 La primera forma normal, es el primer nivel de normalización en el diseño de la base de datos que se aplicará a las tablas de la base de datos para garantizar la organización de los datos de manera que evite redundancias y asegure la consistencia de la información. 
 
 *1.Hospital*
-❖ Se encuentra en 1FN. Tiene una clave primaria única (`id_hospital`) y todos los campos (`nombre`, `dirección`, `ciudad`, `teléfono`, `id_gerente`) contienen valores atómicos y no se repiten.
+❖ Se encuentra en 1FN. Tiene una clave primaria única (`id_hospital`) y todos los campos (`nombre`, `direccion`, `ciudad`, `telefono`, `id_gerente`) contienen valores atómicos y no se repiten.
 
 *2.Gerente*  
 ❖ Cumple 1FN con `id_gerente` como clave primaria. El campo `id_empleado` es único por fila, sin repeticiones ni multivalores.
 
 *3.Empleado*  
-❖ Cumple 1FN. `id_empleado` es la clave primaria y todos los campos (`nombre`, `correo`, `teléfono`, `id_rol`, `id_area`, `id_hospital`) son indivisibles y no repetitivos.
+❖ Cumple 1FN. `id_empleado` es la clave primaria y todos los campos (`nombre`, `correo`, `telefono`, `id_rol`, `id_area`, `id_hospital`) son indivisibles y no repetitivos.
 
 *4.Medico*  
 ❖ En 1FN. Tiene como clave primaria `id_colegiatura` y los atributos `especialidad`, `sueldo`, `id_empleado` son valores atómicos.
@@ -610,7 +625,7 @@ La primera forma normal, es el primer nivel de normalización en el diseño de l
 ❖ Cumple con 1FN. Usa `id_area` como clave primaria. Sus atributos `nombre` y `id_hospital` son únicos y atómicos por fila.
 
 *6.Paciente*  
-❖ Está en 1FN. `id_paciente` es clave primaria y cada uno de sus atributos (`nombre`, `dirección`, `teléfono`, `fecha_nacimiento`, `id_seguro`, `id_historial`, `id_hospital`) es indivisible.
+❖ Está en 1FN. `id_paciente` es clave primaria y cada uno de sus atributos (`nombre`, `direccion`, `telefono`, `fecha_nacimiento`, `id_seguro`, `id_historial`, `id_hospital`) es indivisible.
 
 *7.Historial_clinico*  
 ❖ Satisface la 1FN. `id_historial` es clave única y sus campos (`id_paciente`, `diagnóstico`, `resultado`) no contienen listas ni valores múltiples.
@@ -619,7 +634,7 @@ La primera forma normal, es el primer nivel de normalización en el diseño de l
 ❖ Se encuentra en 1FN. `id_visita` es la clave primaria. Atributos como `fecha`, `hora`, `diagnóstico`, `id_paciente` y `id_medico` contienen valores individuales.
 
 *9.Tratamiento*  
-❖ Cumple 1FN. La clave es `id_tratamiento`, y los atributos (`nombre`, `descripción`, `id_area`, `id_medico`, `costo`) no están repetidos ni contienen múltiples valores por celda.
+❖ Cumple 1FN. La clave es `id_tratamiento`, y los atributos (`nombre`, `descripcion`, `id_area`, `id_medico`, `costo`) no están repetidos ni contienen múltiples valores por celda.
 
 *10.Medicamento*  
 ❖ Está en 1FN. Usa `id_medicamento` como clave primaria. Los campos (`nombre`, `tipo`, `fabricante`, `disponibilidad`) son únicos por fila y atómicos.
@@ -767,7 +782,7 @@ Y de acuerdo a los parametros del proyecto se añade una nueva entidad que sera 
 ❖ Se encuentra en 2FN, con `id_area` como clave primaria. Tanto el `nombre` como el `id_hospital` dependen directamente de esta clave.
 
 9. *Paciente*  
-❖ Se encuentra en 2FN, ya que `id_paciente` es clave primaria, y todos los atributos (`nombre`, `dirección`, `teléfono`, `fecha_nacimiento`, `id_seguro`, `id_historial`, `id_hospital`) dependen completamente de ella.
+❖ Se encuentra en 2FN, ya que `id_paciente` es clave primaria, y todos los atributos (`nombre`, `direccion`, `telefono`, `fecha_nacimiento`, `id_seguro`, `id_historial`, `id_hospital`) dependen completamente de ella.
 
 10. *Seguro_medico*  
 ❖ Se encuentra en 2FN, con `id_seguro` como clave primaria. Los campos `nombre` y `cobertura` dependen completamente de esta clave.
@@ -776,10 +791,10 @@ Y de acuerdo a los parametros del proyecto se añade una nueva entidad que sera 
 ❖ Se encuentra en 2FN, ya que su clave primaria `id_historial` determina completamente los atributos `id_paciente`, `diagnóstico` y `resultado`.
 
 12. *Visita_medica*  
-❖ Se encuentra en 2FN, con `id_visita` como clave primaria. Todos los campos (`id_paciente`, `id_medico`, `fecha`, `hora`, `diagnóstico`) dependen funcionalmente de ella.
+❖ Se encuentra en 2FN, con `id_visita` como clave primaria. Todos los campos (`id_paciente`, `id_medico`, `fecha`, `hora`, `diagnostico`) dependen funcionalmente de ella.
 
 13. *Tratamiento*  
-❖ Se encuentra en 2FN, ya que `id_tratamiento` es clave primaria, y los campos (`nombre`, `descripción`, `id_area`, `id_medico`, `costo`) dependen completamente de ella.
+❖ Se encuentra en 2FN, ya que `id_tratamiento` es clave primaria, y los campos (`nombre`, `descripcion`, `id_area`, `id_medico`, `costo`) dependen completamente de ella.
 
 14. *Medicamento*  
 ❖ Se encuentra en 2FN, con `id_medicamento` como clave primaria. Todos los atributos (`nombre`, `tipo`, `fabricante`, `disponibilidad`) dependen totalmente de esta clave.
