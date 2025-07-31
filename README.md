@@ -70,7 +70,6 @@
 ---
 
 ## Tabla de Contenidos
-
 - [Introducción](#introducción)  
 - [Caso de Estudio](#caso-de-estudio)   
 - [Instalación General](#instalación-general)  
@@ -79,7 +78,10 @@
 - [Construcción del Modelo Lógico](#construcción-del-modelo-lógico)
 - [Normalización del Modelo Lógico](#normalización-del-modelo-lógico)
 - [Control de Acceso y Roles de Usuario](#Control-de-acceso-y-roles-de-datos)
-
+- [100 Consultas realizadas](/dql_select.json)
+- [Insercciones de la base de datos](/dml.json)
+- [20 funciones realizadas](/dql_funciones.json)
+- [Validaciones realizadas](/ddl.json)
 ---
 
 ## Introducción
@@ -167,7 +169,7 @@ Los archivos relacionados con la BBDD del Sistema Hospitalario, se encuentran en
 
 Una vez analizados los requerimientos establecidos para el desarrollo de un sistema hospitalario eficiente, se dio inicio al proceso de diseño del modelo de base de datos en MongoDB. Este análisis incluyó tanto los lineamientos académicos como las prácticas recomendadas por entidades del sector salud, tales como el Ministerio de Salud de Colombia, para garantizar la integridad, trazabilidad y escalabilidad de la información clínica y administrativa.
 
-##**Construcción del Modelo Conceptual**
+##Construcción del Modelo Conceptual
 
 Se diseñó el modelo conceptual identificando cada una de las entidades, sus atributos y las relaciones entre ellas. Este modelo conceptual proporciona una visión clara y estructurada de cómo se organizarán y conectarán los diferentes elementos de la base de datos.
 
@@ -630,6 +632,125 @@ La primera forma normal, es el primer nivel de normalización en el diseño de l
 *11.Inventario*  
 ❖ Se encuentra en 1FN. Tiene como clave `id_inventario`. Los atributos (`id_hospital`, `id_medicamento`, `tipo`, `fabricante`, `disponibilidad`) no se repiten ni agrupan valores.
 
+ *1. Hospital*
+- `id_hospital`: STRING PRIMARY KEY  
+- `nombre`: STRING NOT NULL  
+- `direccion`: STRING NOT NULL  
+- `ciudad`: STRING NOT NULL  
+- `telefono`: STRING NOT NULL  
+- `id_gerente`: INT NOT NULL FOREIGN KEY  
+
+*2. Gerente*
+- `id_gerente`: INT PRIMARY KEY  
+- `id_empleado`: INT NOT NULL FOREIGN KEY  
+
+*3. Empleado*
+- `id_empleado`: INT PRIMARY KEY  
+- `nombre`: STRING NOT NULL  
+- `correo`: STRING NOT NULL  
+- `telefono`: INT NOT NULL  
+- `id_rol`: INT NOT NULL FOREIGN KEY  
+- `id_area`: INT NOT NULL FOREIGN KEY  
+- `id_hospital`: STRING NOT NULL FOREIGN KEY  
+
+*4. Medico*
+- `id_colegiatura`: STRING PRIMARY KEY  
+- `especialidad`: STRING NOT NULL  
+- `sueldo`: DOUBLE NOT NULL  
+- `id_empleado`: INT NOT NULL FOREIGN KEY  
+
+*5. Area*
+- `id_area`: INT PRIMARY KEY  
+- `nombre`: STRING NOT NULL  
+- `id_hospital`: STRING NOT NULL FOREIGN KEY  
+
+*6. Paciente*
+- `id_paciente`: INT PRIMARY KEY  
+- `nombre`: STRING NOT NULL  
+- `direccion`: STRING NOT NULL  
+- `telefono`: INT NOT NULL  
+- `fecha_nacimiento`: DATE NOT NULL  
+- `id_seguro`: INT NOT NULL  
+- `id_historial`: INT NOT NULL FOREIGN KEY  
+- `id_hospital`: STRING NOT NULL FOREIGN KEY  
+
+---
+
+### *7. Historial_clinico*
+- `id_historial`: INT PRIMARY KEY  
+- `id_paciente`: INT NOT NULL FOREIGN KEY  
+- `diagnostico`: STRING NOT NULL  
+- `resultado`: STRING NOT NULL  
+
+*8. Visita_medica*
+- `id_visita`: INT PRIMARY KEY  
+- `id_paciente`: INT NOT NULL FOREIGN KEY  
+- `id_medico`: INT NOT NULL FOREIGN KEY  
+- `fecha`: DATE NOT NULL  
+- `hora`: TIME NOT NULL  
+- `diagnostico`: STRING NOT NULL  
+
+---
+
+### *9. Tratamiento*
+- `id_tratamiento`: INT PRIMARY KEY  
+- `nombre`: STRING NOT NULL  
+- `descripcion`: STRING NOT NULL  
+- `id_area`: INT NOT NULL FOREIGN KEY  
+- `id_medico`: INT NOT NULL FOREIGN KEY  
+- `costo`: DOUBLE NOT NULL  
+
+*10. Medicamento*
+- `id_medicamento`: INT PRIMARY KEY  
+- `nombre`: STRING NOT NULL  
+- `tipo`: STRING NOT NULL  
+- `fabricante`: STRING NOT NULL  
+- `disponibilidad`: BOOLEAN NOT NULL  
+
+
+## Relaciones y Cardinalidades
+
+1. `hospital` "1" — "N" `area`  
+   → Un hospital **tiene muchas** áreas.
+
+2. `hospital` "1" — "N" `empleado`  
+   → Un hospital **emplea a muchos** empleados.
+
+3. `empleado` "1" — "1" `gerente`  
+   → Un empleado **es un único gerente**.
+
+4. `empleado` "1" — "1" `medico`  
+   → Un empleado **puede ser un único médico**.
+
+5. `area` "1" — "N" `medico`  
+   → Un área **puede tener muchos médicos**.
+
+6. `hospital` "1" — "N" `paciente`  
+   → Un hospital **atiende a muchos pacientes**.
+
+7. `paciente` "1" — "1" `historial_clinico`  
+   → Cada paciente **tiene un único historial clínico**.
+
+8. `historial_clinico` "1" — "N" `visita_medica`  
+   → Un historial clínico **incluye muchas visitas médicas**.
+
+9. `visita_medica` "1" — "1" `medico`  
+   → Cada visita médica **es atendida por un único médico**.
+
+10. `visita_medica` "1" — "1" `paciente`  
+    → Cada visita médica **es de un único paciente**.
+
+11. `tratamiento` "N" — "1" `area`  
+    → Cada tratamiento **se aplica en una sola área**.
+
+12. `tratamiento` "N" — "1" `medico`  
+    → Cada tratamiento **es realizado por un médico**.
+
+13. `historial_clinico` "1" — "N" `tratamiento`  
+    → Un historial clínico **puede incluir muchos tratamientos**.
+
+14. `tratamiento` "N" — "1" `medicamento`  
+    → Un tratamiento **puede requerir un solo medicamento** *(relación simplificada)*
 
 ```mermaid
 erDiagram
@@ -790,6 +911,180 @@ Y de acuerdo a los parametros del proyecto se añade una nueva entidad que sera 
 15. *Inventario*  
 ❖ Se encuentra en 2FN, con `id_inventario` como clave primaria. Los campos (`id_hospital`, `id_medicamento`, `tipo`, `fabricante`, `disponibilidad`) dependen completamente de esta clave sin dependencia parcial.
 
+
+*1. Hospital*
+- `id_hospital`: STRING PRIMARY KEY  
+- `nombre`: STRING NOT NULL  
+- `direccion`: STRING NOT NULL  
+- `ciudad`: STRING NOT NULL  
+- `telefono`: STRING NOT NULL  
+- `id_gerente`: INT NOT NULL FOREIGN KEY  
+
+*2. Gerente*
+- `id_gerente`: INT PRIMARY KEY  
+- `id_empleado`: INT NOT NULL FOREIGN KEY  
+
+*3. Empleado*
+- `id_empleado`: INT PRIMARY KEY  
+- `nombre`: STRING NOT NULL  
+- `correo`: STRING NOT NULL  
+- `telefono`: INT NOT NULL  
+- `id_rol`: INT NOT NULL FOREIGN KEY  
+- `id_area`: INT NOT NULL FOREIGN KEY  
+- `id_hospital`: STRING NOT NULL FOREIGN KEY  
+
+*4. Medico*
+- `id_colegiatura`: STRING PRIMARY KEY  
+- `especialidad`: STRING NOT NULL  
+- `sueldo`: DOUBLE NOT NULL  
+- `id_empleado`: INT NOT NULL FOREIGN KEY  
+
+*5. Enfermero*
+- `id`: STRING PRIMARY KEY  
+- `nombre`: STRING NOT NULL  
+- `telefono`: STRING NOT NULL  
+- `correo`: STRING NOT NULL  
+- `salario`: FLOAT NOT NULL  
+- `id_area`: STRING NOT NULL FOREIGN KEY  
+
+*6. Personal_administrativo*
+- `id`: STRING PRIMARY KEY  
+- `nombre`: STRING NOT NULL  
+- `area`: STRING NOT NULL  
+- `telefono`: STRING NOT NULL  
+- `correo`: STRING NOT NULL  
+- `salario`: FLOAT NOT NULL  
+- `id_area`: STRING NOT NULL FOREIGN KEY  
+
+*7. Personal_mantenimiento*
+- `id`: STRING PRIMARY KEY  
+- `nombre`: STRING NOT NULL  
+- `tipo_servicio`: STRING NOT NULL  
+- `telefono`: STRING NOT NULL  
+- `correo`: STRING NOT NULL  
+- `salario`: FLOAT NOT NULL  
+- `id_hospital`: STRING NOT NULL FOREIGN KEY  
+
+*8. Area*
+- `id_area`: INT PRIMARY KEY  
+- `nombre`: STRING NOT NULL  
+- `id_hospital`: STRING NOT NULL FOREIGN KEY  
+
+*9. Paciente*
+- `id_paciente`: INT PRIMARY KEY  
+- `nombre`: STRING NOT NULL  
+- `direccion`: STRING NOT NULL  
+- `telefono`: INT NOT NULL  
+- `fecha_nacimiento`: DATE NOT NULL  
+- `id_seguro`: INT NOT NULL FOREIGN KEY  
+- `id_historial`: INT NOT NULL FOREIGN KEY  
+- `id_hospital`: STRING NOT NULL FOREIGN KEY  
+
+*10. Seguro_medico*
+- `id_seguro`: INT PRIMARY KEY  
+- `nombre`: STRING NOT NULL  
+- `cobertura`: STRING NOT NULL  
+
+*11. Historial_clinico*
+- `id_historial`: INT PRIMARY KEY  
+- `id_paciente`: INT NOT NULL FOREIGN KEY  
+- `diagnostico`: STRING NOT NULL  
+- `resultado`: STRING NOT NULL  
+
+*12. Visita_medica*
+- `id_visita`: INT PRIMARY KEY  
+- `id_paciente`: INT NOT NULL FOREIGN KEY  
+- `id_medico`: INT NOT NULL FOREIGN KEY  
+- `fecha`: DATE NOT NULL  
+- `hora`: TIME NOT NULL  
+- `diagnostico`: STRING NOT NULL  
+
+*13. Tratamiento*
+- `id_tratamiento`: INT PRIMARY KEY  
+- `nombre`: STRING NOT NULL  
+- `descripcion`: STRING NOT NULL  
+- `id_area`: INT NOT NULL FOREIGN KEY  
+- `id_medico`: INT NOT NULL FOREIGN KEY  
+- `costo`: DOUBLE NOT NULL  
+
+*14. Medicamento*
+- `id_medicamento`: INT PRIMARY KEY  
+- `nombre`: STRING NOT NULL  
+- `tipo`: STRING NOT NULL  
+- `fabricante`: STRING NOT NULL  
+- `disponibilidad`: BOOLEAN NOT NULL  
+
+*15. Inventario*
+- `id_inventario`: INT PRIMARY KEY  
+- `id_hospital`: STRING NOT NULL FOREIGN KEY  
+- `id_medicamento`: INT NOT NULL FOREIGN KEY  
+- `tipo`: STRING NOT NULL  
+- `fabricante`: STRING NOT NULL  
+- `disponibilidad`: INT NOT NULL  
+
+---
+
+##  Relaciones y Cardinalidades
+
+1. `hospital` "1" — "N" `area`  
+   → Un hospital **tiene muchas** áreas.
+
+2. `hospital` "1" — "N" `empleado`  
+   → Un hospital **emplea a muchos** empleados.
+
+3. `empleado` "1" — "1" `gerente`  
+   → Un empleado **es un único gerente**.
+
+4. `empleado` "1" — "1" `medico`  
+   → Un empleado **puede especializarse como médico**.
+
+5. `empleado` "1" — "1" `enfermero`  
+   → Un empleado **puede clasificarse como enfermero**.
+
+6. `empleado` "1" — "1" `personal_administrativo`  
+   → Un empleado **puede clasificarse como personal administrativo**.
+
+7. `empleado` "1" — "1" `personal_mantenimiento`  
+   → Un empleado **puede clasificarse como personal de mantenimiento**.
+
+8. `area` "1" — "N" `medico`  
+   → Un área **contiene muchos médicos**.
+
+9. `hospital` "1" — "N" `paciente`  
+   → Un hospital **atiende a muchos pacientes**.
+
+10. `paciente` "1" — "1" `historial_clinico`  
+    → Cada paciente **tiene un único historial clínico**.
+
+11. `paciente` "N" — "1" `seguro_medico`  
+    → Muchos pacientes **pueden estar afiliados a un mismo seguro**.
+
+12. `historial_clinico` "1" — "N" `visita_medica`  
+    → Un historial clínico **incluye muchas visitas médicas**.
+
+13. `visita_medica` "1" — "1" `medico`  
+    → Cada visita médica **es atendida por un único médico**.
+
+14. `visita_medica` "1" — "1" `paciente`  
+    → Cada visita médica **pertenece a un único paciente**.
+
+15. `tratamiento` "N" — "1" `area`  
+    → Cada tratamiento **se aplica en una sola área**.
+
+16. `tratamiento` "N" — "1" `medico`  
+    → Cada tratamiento **es realizado por un médico**.
+
+17. `historial_clinico` "1" — "N" `tratamiento`  
+    → Un historial clínico **puede incluir muchos tratamientos**.
+
+18. `tratamiento` "N" — "1" `medicamento`  
+    → Un tratamiento **puede usar un medicamento** *(relación simplificada)*
+
+19. `inventario` "1" — "1" `hospital`  
+    → Cada registro de inventario **pertenece a un hospital**.
+
+20. `inventario` "1" — "1" `medicamento`  
+    → Cada registro de inventario **contiene un medicamento específico**.
 
 
 ```mermaid
@@ -993,6 +1288,209 @@ La tercera forma normal, es el tercer nivel de normalización en el diseño de l
 
 16. **inventario**  
 ❖ Está en 3FN, ya que todos los atributos (`id_hospital`, `id_medicamento`, `tipo`, `fabricante`, `disponibilidad`) dependen directamente de la clave primaria (`id_inventario`).
+
+*1. Hospital*
+- `id_hospital`: STRING PRIMARY KEY  
+- `nombre`: STRING NOT NULL  
+- `direccion`: STRING NOT NULL  
+- `ciudad`: STRING NOT NULL  
+- `telefono`: INT NOT NULL  
+- `id_gerente`: INT NOT NULL FOREIGN KEY  
+
+*2. Gerente*
+- `id_gerente`: INT PRIMARY KEY  
+- `id_empleado`: INT NOT NULL FOREIGN KEY  
+
+*3. Empleado*
+- `id_empleado`: INT PRIMARY KEY  
+- `nombre`: STRING NOT NULL  
+- `correo`: STRING NOT NULL  
+- `telefono`: INT NOT NULL  
+- `id_rol`: INT NOT NULL FOREIGN KEY  
+- `id_area`: INT NOT NULL FOREIGN KEY  
+- `id_hospital`: STRING NOT NULL FOREIGN KEY  
+
+*4. Medico*
+- `id`: STRING PRIMARY KEY  
+- `nombre`: STRING NOT NULL  
+- `numero_colegiatura`: STRING NOT NULL  
+- `especialidad`: STRING NOT NULL  
+- `telefono`: STRING NOT NULL  
+- `correo`: STRING NOT NULL  
+- `salario`: FLOAT NOT NULL  
+- `id_area`: STRING NOT NULL FOREIGN KEY  
+
+*5. Enfermero*
+- `id`: STRING PRIMARY KEY  
+- `nombre`: STRING NOT NULL  
+- `telefono`: STRING NOT NULL  
+- `correo`: STRING NOT NULL  
+- `salario`: FLOAT NOT NULL  
+- `id_area`: STRING NOT NULL FOREIGN KEY  
+
+*6. Personal_administrativo*
+- `id`: STRING PRIMARY KEY  
+- `nombre`: STRING NOT NULL  
+- `area`: STRING NOT NULL  
+- `telefono`: STRING NOT NULL  
+- `correo66`: STRING NOT NULL  
+- `salario`: FLOAT NOT NULL  
+- `id_area`: STRING NOT NULL FOREIGN KEY  
+
+*7. Personal_mantenimiento*
+- `id`: STRING PRIMARY KEY  
+- `nombre`: STRING NOT NULL  
+- `tipo_servicio`: STRING NOT NULL  
+- `telefono`: STRING NOT NULL  
+- `correo`: STRING NOT NULL  
+- `salario`: FLOAT NOT NULL  
+- `id_hospital`: STRING NOT NULL FOREIGN KEY  
+
+*8. Area*
+- `id_area`: INT PRIMARY KEY  
+- `nombre`: STRING NOT NULL  
+- `id_hospital`: STRING NOT NULL FOREIGN KEY  
+
+*9. Paciente*
+- `id_paciente`: INT PRIMARY KEY  
+- `nombre`: STRING NOT NULL  
+- `direccion`: STRING NOT NULL  
+- `telefono`: INT NOT NULL  
+- `fecha_nacimiento`: DATE NOT NULL  
+- `id_genero`: INT NOT NULL FOREIGN KEY  
+- `id_rango_etario`: INT NOT NULL FOREIGN KEY  
+- `id_seguro`: INT NOT NULL FOREIGN KEY  
+- `id_historial`: INT NOT NULL FOREIGN KEY  
+- `id_hospital`: STRING NOT NULL FOREIGN KEY  
+
+*10. Genero*
+- `id_genero`: INT PRIMARY KEY  
+- `descripcion`: STRING NOT NULL  
+
+*11. Rango_edad*
+- `id_rango_edad`: INT PRIMARY KEY  
+- `descripcion`: STRING NOT NULL  
+
+*12. Seguro_medico*
+- `id_seguro`: INT PRIMARY KEY  
+- `nombre`: STRING NOT NULL  
+- `id_tipo_seguro`: INT NOT NULL FOREIGN KEY  
+- `cobertura`: STRING NOT NULL  
+
+*13. Tipo_seguro*
+- `id_tipo_seguro`: INT PRIMARY KEY  
+- `descripcion`: STRING NOT NULL  
+
+*14. Historial_clinico*
+- `id_historial`: INT PRIMARY KEY  
+- `id_paciente`: INT NOT NULL FOREIGN KEY  
+- `diagnostico`: STRING NOT NULL  
+- `resultado`: STRING NOT NULL  
+
+*15. Visita_medica*
+- `id_visita`: INT PRIMARY KEY  
+- `id_paciente`: INT NOT NULL FOREIGN KEY  
+- `id_medico`: INT NOT NULL FOREIGN KEY  
+- `fecha`: DATE NOT NULL  
+- `hora`: TIME NOT NULL  
+- `diagnostico`: STRING NOT NULL  
+
+*16. Tratamiento*
+- `id_tratamiento`: INT PRIMARY KEY  
+- `nombre`: STRING NOT NULL  
+- `descripcion`: STRING NOT NULL  
+- `id_area`: INT NOT NULL FOREIGN KEY  
+- `id_medico`: INT NOT NULL FOREIGN KEY  
+- `costo`: DOUBLE NOT NULL  
+
+*17. Medicamento*
+- `id_medicamento`: INT PRIMARY KEY  
+- `nombre`: STRING NOT NULL  
+- `tipo`: STRING NOT NULL  
+- `fabricante`: STRING NOT NULL  
+- `disponibilidad`: BOOLEAN NOT NULL  
+
+*18. Inventario*
+- `id_inventario`: INT PRIMARY KEY  
+- `id_hospital`: STRING NOT NULL FOREIGN KEY  
+- `id_medicamento`: INT NOT NULL FOREIGN KEY  
+- `tipo`: STRING NOT NULL  
+- `fabricante`: STRING NOT NULL  
+- `disponibilidad`: INT NOT NULL  
+
+
+
+## Relaciones y Cardinalidades
+
+1. `hospital` "1" — "N" `area`  
+   → Un hospital **tiene muchas** áreas.
+
+2. `hospital` "1" — "N" `empleado`  
+   → Un hospital **emplea a muchos** empleados.
+
+3. `empleado` "1" — "1" `gerente`  
+   → Un empleado **puede ser un gerente**.
+
+4. `empleado` "1" — "1" `medico`  
+   → Un empleado **puede especializarse como médico**.
+
+5. `empleado` "1" — "1" `enfermero`  
+   → Un empleado **puede clasificarse como enfermero**.
+
+6. `empleado` "1" — "1" `personal_administrativo`  
+   → Un empleado **puede clasificarse como personal administrativo**.
+
+7. `empleado` "1" — "1" `personal_mantenimiento`  
+   → Un empleado **puede clasificarse como personal de mantenimiento**.
+
+8. `area` "1" — "N" `medico`  
+   → Un área **puede contener muchos médicos**.
+
+9. `hospital` "1" — "N" `paciente`  
+   → Un hospital **atiende a muchos pacientes**.
+
+10. `paciente` "1" — "1" `historial_clinico`  
+    → Cada paciente **tiene un único historial clínico**.
+
+11. `paciente` "N" — "1" `genero`  
+    → Cada paciente **tiene un género**.
+
+12. `paciente` "N" — "1" `rango_edad`  
+    → Cada paciente **pertenece a un rango etario**.
+
+13. `paciente` "N" — "1" `seguro_medico`  
+    → Cada paciente **está afiliado a un seguro**.
+
+14. `seguro_medico` "N" — "1" `tipo_seguro`  
+    → Un seguro médico **corresponde a un tipo de seguro**.
+
+15. `historial_clinico` "1" — "N" `visita_medica`  
+    → Un historial **incluye muchas visitas médicas**.
+
+16. `visita_medica` "1" — "1" `medico`  
+    → Cada visita **es atendida por un médico**.
+
+17. `visita_medica` "1" — "1" `paciente`  
+    → Cada visita **pertenece a un paciente**.
+
+18. `tratamiento` "N" — "1" `area`  
+    → Un tratamiento **se aplica en una sola área**.
+
+19. `tratamiento` "N" — "1" `medico`  
+    → Un tratamiento **es responsabilidad de un médico**.
+
+20. `historial_clinico` "1" — "N" `tratamiento`  
+    → Un historial **puede incluir varios tratamientos**.
+
+21. `tratamiento` "N" — "1" `medicamento`  
+    → Un tratamiento **puede usar medicamentos** *(relación simplificada)*
+
+22. `inventario` "1" — "1" `hospital`  
+    → Un inventario **pertenece a un hospital**.
+
+23. `inventario` "1" — "1" `medicamento`  
+    → Un inventario **contiene un medicamento específico**.
+
 
 ```mermaid
 erDiagram
