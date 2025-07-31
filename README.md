@@ -2142,3 +2142,8 @@ db.createCollection("visita_medica", {
   validationAction: "error"
 });
 ```
+
+## Video Sustentación
+
+[Drive](https://drive.google.com/drive/folders/1yI0PlQ9EPWCh14ZT8aWEArNNo-1jN0_6?usp=sharing)
+
