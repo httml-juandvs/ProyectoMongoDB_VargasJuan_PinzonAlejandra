@@ -1252,3 +1252,395 @@ db.createUser({
     ]
 });
 ```
+## Construcción del Modelo Físico 
+Se diseñó el modelo físico considerando el modelo lógico que incluye todas las entidades, sus atributos y las relaciones entre ellas. Además, este modelo incorpora los tipos de datos de los atributos previamente definidos, los cuales fueron estructurados en tablas utilizando el lenguaje de un Sistema de Gestión de Bases de Datos (SGBD) compatible con la plataforma MongoDB.
+27 
+## Descripción 
+El modelo físico se diseñó para funcionar en MongoBD, donde cada entidad se representa como una tabla compuesta por sus atributos correspondientes, organizados en columnas con tipos de datos específicos según sea necesario. 
+
+## Paso 1: Crear la base de datos
+```js
+use sistema_hospitalario;
+```
+
+## Paso 2: Crear colección `hospital` con validación estricta
+```js
+db.createCollection("hospital", {
+  validator: {
+    $jsonSchema: {
+      bsonType: "object",
+      required: ["id_hospital", "nombre", "direccion", "ciudad", "telefono", "id_gerente"],
+      properties: {
+        id_hospital: { bsonType: "string" },
+        nombre: { bsonType: "string" },
+        direccion: { bsonType: "string" },
+        ciudad: { bsonType: "string" },
+        telefono: { bsonType: "string" },
+        id_gerente: { bsonType: "string" }
+      }
+    }
+  },
+  validationLevel: "strict",
+  validationAction: "error"
+});
+```
+
+## Paso 3: Crear colección `gerente` que referencia a empleado
+```js
+db.createCollection("gerente", {
+  validator: {
+    $jsonSchema: {
+      bsonType: "object",
+      required: ["id_gerente", "id_empleado"],
+      properties: {
+        id_gerente: { bsonType: "string" },
+        id_empleado: { bsonType: "string" }
+      }
+    }
+  },
+  validationLevel: "strict",
+  validationAction: "error"
+});
+```
+
+## Creación colección: empleado
+```js
+db.createCollection("empleado", {
+  validator: {
+    $jsonSchema: {
+      bsonType: "object",
+      required: ["id_empleado","nombre","correo","telefono","id_rol","id_area","id_hospital"],
+      properties: {
+        id_empleado: { bsonType: "string" },
+        nombre: { bsonType: "string" },
+        correo: { bsonType: "string" },
+        telefono: { bsonType: "string" },
+        id_rol: { bsonType: "string" },
+        id_area: { bsonType: ["string","null"] },
+        id_hospital: { bsonType: "string" }
+      }
+    }
+  },
+  validationLevel: "strict",
+  validationAction: "error"
+});
+```
+
+## Creación colección: enfermero
+```js
+db.createCollection("enfermero", {
+  validator: {
+    $jsonSchema: {
+      bsonType: "object",
+      required: ["id","nombre","telefono","correo","salario","id_area"],
+      properties: {
+        id: { bsonType: "string" },
+        nombre: { bsonType: "string" },
+        telefono: { bsonType: "string" },
+        correo: { bsonType: "string" },
+        salario: { bsonType: "string" },
+        id_area: { bsonType: "string" }
+      }
+    }
+  },
+  validationLevel: "strict",
+  validationAction: "error"
+});
+```
+
+## Creación colección: personal_administrativo
+```js
+db.createCollection("personal_administrativo", {
+  validator: {
+    $jsonSchema: {
+      bsonType: "object",
+      required: ["id","nombre","area","telefono","correo","salario","id_area"],
+      properties: {
+        id: { bsonType: "string" },
+        nombre: { bsonType: "string" },
+        area: { bsonType: "string" },
+        telefono: { bsonType: "string" },
+        correo: { bsonType: "string" },
+        salario: { bsonType: "string" },
+        id_area: { bsonType: "string" }
+      }
+    }
+  },
+  validationLevel: "strict",
+  validationAction: "error"
+});
+```
+
+## Creación colección: personal_mantenimiento
+```js
+db.createCollection("personal_mantenimiento", {
+  validator: {
+    $jsonSchema: {
+      bsonType: "object",
+      required: ["id","nombre","tipo_servicio","telefono","correo","salario","id_hospital"],
+      properties: {
+        id: { bsonType: "string" },
+        nombre: { bsonType: "string" },
+        tipo_servicio: { bsonType: "string" },
+        telefono: { bsonType: "string" },
+        correo: { bsonType: "string" },
+        salario: { bsonType: "string" },
+        id_hospital: { bsonType: "string" }
+      }
+    }
+  },
+  validationLevel: "strict",
+  validationAction: "error"
+});
+```
+
+## Creación colección: medico
+```js
+db.createCollection("medico", {
+  validator: {
+    $jsonSchema: {
+      bsonType: "object",
+      required: ["id","nombre","numero_colegiatura","especialidad","telefono","correo","salario","id_area"],
+      properties: {
+        id: { bsonType: "string" },
+        nombre: { bsonType: "string" },
+        numero_colegiatura: { bsonType: "string" },
+        especialidad: { bsonType: "string" },
+        telefono: { bsonType: "string" },
+        correo: { bsonType: "string" },
+        salario: { bsonType: "string" },
+        id_area: { bsonType: "string" }
+      }
+    }
+  },
+  validationLevel: "strict",
+  validationAction: "error"
+});
+```
+
+## Creación colección: area
+```js
+db.createCollection("area", {
+  validator: {
+    $jsonSchema: {
+      bsonType: "object",
+      required: ["id_area","nombre","id_hospital"],
+      properties: {
+        id_area: { bsonType: "string" },
+        nombre: { bsonType: "string" },
+        id_hospital: { bsonType: "string" }
+      }
+    }
+  },
+  validationLevel: "strict",
+  validationAction: "error"
+});
+```
+
+## Creación colección: paciente
+```js
+db.createCollection("paciente", {
+  validator: {
+    $jsonSchema: {
+      bsonType: "object",
+      required: ["id_paciente","nombre","direccion","telefono","fecha_nacimiento","correo","id_genero","id_rango_edad","id_seguro","id_historial","id_hospital"],
+      properties: {
+        id_paciente: { bsonType: "string" },
+        nombre: { bsonType: "string" },
+        direccion: { bsonType: "string" },
+        telefono: { bsonType: "string" },
+        fecha_nacimiento: { bsonType: "string" },
+        correo: { bsonType: "string" },
+        id_genero: { bsonType: "string" },
+        id_rango_edad: { bsonType: "string" },
+        id_seguro: { bsonType: "string" },
+        id_historial: { bsonType: "string" },
+        id_hospital: { bsonType: "string" }
+      }
+    }
+  },
+  validationLevel: "strict",
+  validationAction: "error"
+});
+```
+
+## Creación colección: genero
+```js
+db.createCollection("genero", {
+  validator: {
+    $jsonSchema: {
+      bsonType: "object",
+      required: ["id_genero","descripcion"],
+      properties: {
+        id_genero: { bsonType: "string" },
+        descripcion: { bsonType: "string" }
+      }
+    }
+  },
+  validationLevel: "strict",
+  validationAction: "error"
+});
+```
+
+## Creación colección: rango_edad
+```js
+db.createCollection("rango_edad", {
+  validator: {
+    $jsonSchema: {
+      bsonType: "object",
+      required: ["id_rango_edad","descripcion"],
+      properties: {
+        id_rango_edad: { bsonType: "string" },
+        descripcion: { bsonType: "string" }
+      }
+    }
+  },
+  validationLevel: "strict",
+  validationAction: "error"
+});
+```
+
+## Creación colección: tipo_seguro
+```js
+db.createCollection("tipo_seguro", {
+  validator: {
+    $jsonSchema: {
+      bsonType: "object",
+      required: ["id_tipo_seguro","descripcion"],
+      properties: {
+        id_tipo_seguro: { bsonType: "string" },
+        descripcion: { bsonType: "string" }
+      }
+    }
+  },
+  validationLevel: "strict",
+  validationAction: "error"
+});
+```
+
+## Creación colección: seguro_medico
+```js
+db.createCollection("seguro_medico", {
+  validator: {
+    $jsonSchema: {
+      bsonType: "object",
+      required: ["id_seguro","nombre","id_tipo_seguro","cobertura"],
+      properties: {
+        id_seguro: { bsonType: "string" },
+        nombre: { bsonType: "string" },
+        id_tipo_seguro: { bsonType: "string" },
+        cobertura: { bsonType: "string" }
+      }
+    }
+  },
+  validationLevel: "strict",
+  validationAction: "error"
+});
+```
+
+## Creación colección: historial_clinico
+```js
+db.createCollection("historial_clinico", {
+  validator: {
+    $jsonSchema: {
+      bsonType: "object",
+      required: ["id_historial","id_paciente","diagnostico","resultado"],
+      properties: {
+        id_historial: { bsonType: "string" },
+        id_paciente: { bsonType: "string" },
+        diagnostico: { bsonType: "string" },
+        resultado: { bsonType: "string" }
+      }
+    }
+  },
+  validationLevel: "strict",
+  validationAction: "error"
+});
+```
+
+## Creación colección: tratamiento
+```js
+db.createCollection("tratamiento", {
+  validator: {
+    $jsonSchema: {
+      bsonType: "object",
+      required: ["id_tratamiento","nombre","descripcion","id_area","id_medico","costo"],
+      properties: {
+        id_tratamiento: { bsonType: "string" },
+        nombre: { bsonType: "string" },
+        descripcion: { bsonType: "string" },
+        id_area: { bsonType: "string" },
+        id_medico: { bsonType: "string" },
+        costo: { bsonType: "string" }
+      }
+    }
+  },
+  validationLevel: "strict",
+  validationAction: "error"
+});
+```
+
+## Creación colección: medicamento
+```js
+db.createCollection("medicamento", {
+  validator: {
+    $jsonSchema: {
+      bsonType: "object",
+      required: ["id_medicamento","nombre","tipo","fabricante","disponibilidad"],
+      properties: {
+        id_medicamento: { bsonType: "string" },
+        nombre: { bsonType: "string" },
+        tipo: { bsonType: "string" },
+        fabricante: { bsonType: "string" },
+        disponibilidad: { bsonType: "string" }
+      }
+    }
+  },
+  validationLevel: "strict",
+  validationAction: "error"
+});
+```
+
+## Creación colección: inventario
+```js
+db.createCollection("inventario", {
+  validator: {
+    $jsonSchema: {
+      bsonType: "object",
+      required: ["id_inventario","id_hospital","id_medicamento","tipo","fabricante","disponibilidad"],
+      properties: {
+        id_inventario: { bsonType: "string" },
+        id_hospital: { bsonType: "string" },
+        id_medicamento: { bsonType: "string" },
+        tipo: { bsonType: "string" },
+        fabricante: { bsonType: "string" },
+        disponibilidad: { bsonType: "string" }
+      }
+    }
+  },
+  validationLevel: "strict",
+  validationAction: "error"
+});
+```
+
+## Creación colección: visita_medica
+```js
+db.createCollection("visita_medica", {
+  validator: {
+    $jsonSchema: {
+      bsonType: "object",
+      required: ["id_visita","id_paciente","id_medico","fecha","hora","diagnostico"],
+      properties: {
+        id_visita: { bsonType: "string" },
+        id_paciente: { bsonType: "string" },
+        id_medico: { bsonType: "string" },
+        fecha: { bsonType: "string" },
+        hora: { bsonType: "string" },
+        diagnostico: { bsonType: "string" }
+      }
+    }
+  },
+  validationLevel: "strict",
+  validationAction: "error"
+});
+```
